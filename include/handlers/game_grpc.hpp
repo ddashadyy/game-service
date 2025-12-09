@@ -3,14 +3,14 @@
 
 #include <service_service.usrv.pb.hpp>
 #include <repository/postgres_manager.hpp>
-
+#include <managers/igdb_namager.hpp>
 
 namespace game_service {
 
 class GameService final : public ::games::GameServiceBase 
 {
 public:
-    explicit GameService(std::string prefix, pg::PostgresManager manager);
+    explicit GameService(std::string prefix, pg::PostgresManager manager, igdb::IGDBManager igdb_manager);
 
     SearchGamesResult SearchGames(CallContext& context, ::games::SearchGamesRequest&& request) override;
     GetGameResult GetGame(CallContext& context, ::games::GetGameRequest&& request) override;
@@ -20,7 +20,8 @@ public:
 
 private:
     std::string prefix_;
-    pg::PostgresManager manager_;
+    pg::PostgresManager pg_manager_;
+    igdb::IGDBManager igdb_manager_;
 };
 
 

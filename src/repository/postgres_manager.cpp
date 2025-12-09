@@ -49,6 +49,9 @@ namespace {
         "  genres, themes, platforms, created_at, updated_at"
     };
 
+    const userver::storages::postgres::Query kFindGame {
+        ""
+    };
 }
 
 
@@ -87,4 +90,21 @@ entities::GamePostgres pg::PostgresManager::CreateGame(
     }
 
     return {};
+}
+
+entities::GamePostgres pg::PostgresManager::FindGame(std::string_view query, std::uint32_t limit) const
+{
+    try 
+    {
+        const auto kResult = pg_cluster_->Execute(
+            userver::storages::postgres::ClusterHostType::kMaster,
+            kFindGame,
+            query,
+            limit
+        );
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR() << e.what() << '\n';
+    }
 }

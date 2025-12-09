@@ -24,6 +24,8 @@ public:
         const std::vector<std::string>& kThemes,      const std::vector<std::string>& kPlatforms
     ) const;
 
+    entities::GamePostgres FindGame(std::string_view query, std::uint32_t limit) const;
+
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
 };
