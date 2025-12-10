@@ -19,6 +19,8 @@ endif()
 
 userver_setup_environment()
 
+# find_package(fmt REQUIRED)
+
 include(FetchContent)
 FetchContent_Declare(
     json
@@ -43,6 +45,7 @@ add_library(igdb_api_client_lib STATIC
 target_link_libraries(igdb_api_client_lib PUBLIC 
     # --- [FIX 2] Добавляем userver::core, чтобы видеть fmt и логи ---
     userver::core
+    # fmt::fmt
     Boost::headers
     OpenSSL::SSL
     OpenSSL::Crypto
@@ -75,8 +78,8 @@ target_link_libraries(${PROJECT_NAME}_objs PUBLIC userver::postgresql userver::g
 # Например, если папка playhub-proto лежит на уровень выше папки проекта:
 # set(PROTO_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../playhub-proto")
 # Если путь жесткий, лучше указывать полный путь, но попробуем оставить, если работает.
-set(GAME_SERVICE_PROTO_FILE "$ENV{HOME}/playhub-proto/proto/games/games.proto")
-set(PROTO_ROOT "$ENV{HOME}/playhub-proto/proto/games")
+set(PROTO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/third_party/playhub-proto/proto/games")
+set(GAME_SERVICE_PROTO_FILE "${PROTO_ROOT}/games.proto")
 set(GENERATED_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/generated")
 
 userver_add_grpc_library(

@@ -38,7 +38,7 @@ components_manager:
         game-service:
             task-processor: main-task-processor
             game-prefix: Game
-            env-file: $env-file
+            # env-file: $env-file
 
 
         http-client:

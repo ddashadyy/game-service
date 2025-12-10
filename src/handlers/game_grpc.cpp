@@ -1,53 +1,56 @@
 #include <handlers/game_grpc.hpp>
 
 #include <boost/uuid/uuid_io.hpp>
-#include <userver/storages/postgres/database.hpp>
 #include <userver/storages/postgres/component.hpp>
-namespace { 
+#include <userver/storages/postgres/database.hpp>
+namespace {
 
 template <typename Source, typename Destination>
-void MoveToProto(Source& src, Destination* dst) 
+void MoveToProto(Source& src, Destination* dst)
 {
     dst->Reserve(src.size());
-    for (auto& item : src) 
+    for (auto& item : src)
         *dst->Add() = std::move(item);
 }
 
-}
+} // namespace
 
-game_service::GameService::GameService(std::string prefix, pg::PostgresManager manager, igdb::IGDBManager igdb_manager)
-    : prefix_(std::move(prefix)), pg_manager_(std::move(manager)), igdb_manager_(std::move(igdb_manager)) {}
+game_service::GameService::GameService(std::string prefix,
+                                       pg::PostgresManager manager,
+                                       igdb::IGDBManager igdb_manager)
+    : prefix_(std::move(prefix)), pg_manager_(std::move(manager)),
+      igdb_manager_(std::move(igdb_manager))
+{}
 
-
-::games::GameServiceBase::SearchGamesResult game_service::GameService::SearchGames(
-    CallContext& context, ::games::SearchGamesRequest&& request
-) 
+::games::GameServiceBase::SearchGamesResult
+game_service::GameService::SearchGames(CallContext& context,
+                                       ::games::SearchGamesRequest&& request)
 {
-    if (request.query().empty()) 
-        return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "Query cannot be empty");
-    
+    if (request.query().empty())
+        return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
+                            "Query cannot be empty");
 
     ::games::GamesListResponse response;
 
-    try 
+    try
     {
         auto pg_games = pg_manager_.FindGame(request.query(), request.limit());
-        
-        if (!pg_games.empty()) 
+
+        if (!pg_games.empty())
         {
             response.mutable_games()->Reserve(pg_games.size());
-            for (auto& game : pg_games) 
+            for (auto& game : pg_games)
                 FillResponseWithPgData(response, std::move(game));
-            
 
-            return response; 
+            return response;
         }
 
-    
-        const auto kIgdbResults = igdb_manager_.SearchGames(request.query(), request.limit());
-        
-        if (kIgdbResults.empty()) return response; 
-        
+        const auto kIgdbResults =
+            igdb_manager_.SearchGames(request.query(), request.limit());
+
+        if (kIgdbResults.empty())
+            return response;
+
         response.mutable_games()->Reserve(kIgdbResults.size());
 
         for (const auto& igdb_game : kIgdbResults)
@@ -57,23 +60,21 @@ game_service::GameService::GameService(std::string prefix, pg::PostgresManager m
         }
 
         return response;
-
     }
     catch (const std::exception& ex)
     {
         LOG_ERROR() << "Database query failed: " << ex.what();
-        return grpc::Status(grpc::StatusCode::CANCELLED, "Games not found");  
+        return grpc::Status(grpc::StatusCode::CANCELLED, "Games not found");
     }
 
     return grpc::Status(grpc::StatusCode::UNKNOWN, "Unexpected error");
 }
 
 void game_service::GameService::FillResponseWithPgData(
-    ::games::GamesListResponse& response, entities::GamePostgres&& pgData
-) const
+    ::games::GamesListResponse& response, entities::GamePostgres&& pgData) const
 {
     auto* game = response.add_games();
-    
+
     game->set_id(boost::uuids::to_string(pgData.id));
     game->set_igdb_id(std::move(pgData.igdb_id));
 
@@ -93,23 +94,28 @@ void game_service::GameService::FillResponseWithPgData(
     MoveToProto(pgData.genres, game->mutable_genres());
     MoveToProto(pgData.themes, game->mutable_themes());
     MoveToProto(pgData.platforms, game->mutable_platforms());
-
 }
 
 game_service::GameServiceComponent::GameServiceComponent(
-    const userver::components::ComponentConfig& config, const userver::components::ComponentContext& context
-) : userver::ugrpc::server::ServiceComponentBase(config, context), 
-    service_(
-        config["game-prefix"].As<std::string>(),
-        pg::PostgresManager(
-            context.FindComponent<userver::components::Postgres>("playhub-games-db").GetCluster()
-        ),
-        igdb::IGDBManager(config["env-file"].As<std::string>())
-    ) { RegisterService(service_); }
-
-userver::yaml_config::Schema game_service::GameServiceComponent::GetStaticConfigSchema()
+    const userver::components::ComponentConfig& config,
+    const userver::components::ComponentContext& context)
+    : userver::ugrpc::server::ServiceComponentBase(config, context),
+      service_(
+          config["game-prefix"].As<std::string>(),
+          pg::PostgresManager(context
+                                  .FindComponent<userver::components::Postgres>(
+                                      "playhub-games-db")
+                                  .GetCluster()),
+          igdb::IGDBManager())
 {
-    return userver::yaml_config::MergeSchemas<userver::ugrpc::server::ServiceComponentBase>(
+    RegisterService(service_);
+}
+
+userver::yaml_config::Schema
+game_service::GameServiceComponent::GetStaticConfigSchema()
+{
+    return userver::yaml_config::MergeSchemas<
+        userver::ugrpc::server::ServiceComponentBase>(
         R"(
             type: object
             description: Game gRPC service component
@@ -118,9 +124,6 @@ userver::yaml_config::Schema game_service::GameServiceComponent::GetStaticConfig
                 game-prefix:
                     type: string
                     description: game prefix
-                env-file:
-                    type: string
-                    description: Path to the .env file
                 database:
                     type: object
                     description: Database connection settings
@@ -138,6 +141,5 @@ userver::yaml_config::Schema game_service::GameServiceComponent::GetStaticConfig
                         password:
                             type: string
                             description: Database password
-        )"
-    );
+        )");
 }

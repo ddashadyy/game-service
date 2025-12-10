@@ -1,48 +1,43 @@
-#pragma once 
-
+#pragma once
 
 // project headers
 #include <structs/game_info.hpp>
 
 // std
-#include <string>
+#include <chrono>
 #include <cstdint>
 #include <optional>
-#include <chrono>
+#include <string>
 
 namespace igdb {
 
-class IGDBManager final 
-{
-public:
+class IGDBManager final {
+ public:
+  using GamesInfo = std::vector<entities::GameInfo>;
 
-    using GamesInfo = std::vector<entities::GameInfo>;
+  IGDBManager();
+  ~IGDBManager() = default;
 
-    IGDBManager() = default;
-    explicit IGDBManager(std::string_view envFile);
-    ~IGDBManager() = default;
+  std::optional<std::string> GetTwitchToken() const;
 
-    std::optional<std::string> GetTwitchToken() const;
+  bool Authenticate();
 
-    bool Authenticate();
+  GamesInfo SearchGames(std::string_view query, std::int32_t limit = 10);
+  GamesInfo GetGamesByGenre(std::string_view genre, std::int32_t limit = 20);
+  GamesInfo GetTopRatedGames(std::int32_t limit = 10);
+  GamesInfo GetUpcomingGames(std::int32_t limit = 10);
 
-    GamesInfo SearchGames(std::string_view query, std::int32_t limit = 10);
-    GamesInfo GetGamesByGenre(std::string_view genre, std::int32_t limit = 20);
-    GamesInfo GetTopRatedGames(std::int32_t limit = 10);
-    GamesInfo GetUpcomingGames(std::int32_t limit = 10);
+ private:
+  GamesInfo ParseGamesResponse(std::string_view response) const;
 
-private:
+  mutable std::optional<std::string> cachedToken_;
+  mutable std::chrono::system_clock::time_point tokenExpiry_;
 
-    GamesInfo ParseGamesResponse(std::string_view response) const;
+  std::string clientId_;
+  std::string clientSecret_;
+  std::string accessToken_;
 
-    mutable std::optional<std::string> cachedToken_;
-    mutable std::chrono::system_clock::time_point tokenExpiry_;
-    
-    std::string clientId_;
-    std::string clientSecret_;
-    std::string accessToken_;
-    
-    static constexpr std::uint32_t kTokenExpiryBufferSeconds = 300;
+  static constexpr std::uint32_t kTokenExpiryBufferSeconds = 300;
 };
 
-} // namespace igdb
+}  // namespace igdb
