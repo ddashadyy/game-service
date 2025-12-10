@@ -75,7 +75,7 @@ target_link_libraries(${PROJECT_NAME}_objs PUBLIC userver::postgresql userver::g
 # Например, если папка playhub-proto лежит на уровень выше папки проекта:
 # set(PROTO_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../playhub-proto")
 # Если путь жесткий, лучше указывать полный путь, но попробуем оставить, если работает.
-set(GAME_SERVICE_PROTO_FILE "$ENV{HOME}/playhub-proto/proto/games/service.proto")
+set(GAME_SERVICE_PROTO_FILE "$ENV{HOME}/playhub-proto/proto/games/games.proto")
 set(PROTO_ROOT "$ENV{HOME}/playhub-proto/proto/games")
 set(GENERATED_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/generated")
 
