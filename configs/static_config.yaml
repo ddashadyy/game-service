@@ -38,12 +38,12 @@ components_manager:
         game-service:
             task-processor: main-task-processor
             game-prefix: Game
+            env-file: $env-file
 
 
         http-client:
         http-client-core:
             load-enabled: $is_testing
-            fs-task-processor: fs-task-processor
 
         dns-client:
             fs-task-processor: fs-task-processor
@@ -73,6 +73,3 @@ components_manager:
             # The single listening port for incoming RPCs
             port: $grpc-server-port
             completion-queue-count: 3
-
-        handler-hello-grpc:
-            task-processor: main-task-processor
