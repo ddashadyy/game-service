@@ -20,7 +20,7 @@ struct GamePostgres
     std::string summary;
     
     double rating;
-    std::uint32_t hypes;
+    std::int32_t hypes;
     
     std::string firstReleaseDate;
     std::vector<std::string> releaseDates;

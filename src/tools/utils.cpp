@@ -75,13 +75,13 @@ const std::string utils::PerformHttpRequest(
         net::connect(lowest_layer, results.begin(), results.end());
         stream.handshake(ssl::stream_base::client);
         
-        http::request<http::string_body> req{method, target, 11};
-        req.set(http::field::host, host);
+        http::request<http::string_body> req{method, boost::string_view(target.data()), 11};
+        req.set(http::field::host, boost::string_view(host.data()));
         req.set(http::field::user_agent, "IGDB-CPP-Client/1.0");
         
         for (const auto& [key, value] : headers) 
         {
-            req.set(key, value);
+            req.set(boost::string_view(key.data()), boost::string_view(value.data()));
         }
         
         if (!body.empty()) 

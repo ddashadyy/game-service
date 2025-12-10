@@ -1,5 +1,5 @@
 // project headers
-#include <managers/igdb_namager.hpp>
+#include <managers/igdb_manager.hpp>
 #include <parser/json_parser.hpp>
 #include <tools/utils.hpp>
 
@@ -94,7 +94,7 @@ bool igdb::IGDBManager::Authenticate()
 
 }
 
-std::vector<entities::GameInfo> igdb::IGDBManager::SearchGames(std::string_view query, std::uint32_t limit) 
+igdb::IGDBManager::GamesInfo igdb::IGDBManager::SearchGames(std::string_view query, std::int32_t limit) 
 {
     if (!Authenticate()) 
     {
@@ -122,7 +122,7 @@ std::vector<entities::GameInfo> igdb::IGDBManager::SearchGames(std::string_view 
     return ParseGamesResponse(response);
 }
 
-std::vector<entities::GameInfo> igdb::IGDBManager::GetGamesByGenre(std::string_view genre, std::uint32_t limit) 
+igdb::IGDBManager::GamesInfo igdb::IGDBManager::GetGamesByGenre(std::string_view genre, std::int32_t limit) 
 {
     if (!Authenticate()) 
     {
@@ -152,7 +152,7 @@ std::vector<entities::GameInfo> igdb::IGDBManager::GetGamesByGenre(std::string_v
     return ParseGamesResponse(response);
 }
 
-std::vector<entities::GameInfo> igdb::IGDBManager::GetTopRatedGames(std::uint32_t limit) 
+igdb::IGDBManager::GamesInfo igdb::IGDBManager::GetTopRatedGames(std::int32_t limit) 
 {
     if (!Authenticate()) 
     {
@@ -183,7 +183,7 @@ std::vector<entities::GameInfo> igdb::IGDBManager::GetTopRatedGames(std::uint32_
     return ParseGamesResponse(response);
 }
 
-std::vector<entities::GameInfo> igdb::IGDBManager::GetUpcomingGames(std::uint32_t limit) 
+igdb::IGDBManager::GamesInfo igdb::IGDBManager::GetUpcomingGames(std::int32_t limit) 
 {
     if (!Authenticate()) 
     {
@@ -216,7 +216,7 @@ std::vector<entities::GameInfo> igdb::IGDBManager::GetUpcomingGames(std::uint32_
     return ParseGamesResponse(response);
 }
 
-std::vector<entities::GameInfo> igdb::IGDBManager::ParseGamesResponse(std::string_view response) const 
+igdb::IGDBManager::GamesInfo igdb::IGDBManager::ParseGamesResponse(std::string_view response) const 
 {
     std::vector<entities::GameInfo> games;
     

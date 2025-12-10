@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-
+#include <cstdint> 
 
 namespace entities {
 
@@ -16,7 +16,7 @@ struct GameInfo
     
     // Рейтинги и популярность
     double rating;
-    std::uint32_t hypes;
+    std::int32_t hypes;
     
     // Даты
     std::string firstReleaseDate;

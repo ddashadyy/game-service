@@ -9,7 +9,7 @@ struct userver::storages::postgres::io::CppToUserPg<boost::uuids::uuid>
 };
 
 template <>
-struct userver::storages::postgres::io::CppToUserPg<std::uint32_t> 
+struct userver::storages::postgres::io::CppToUserPg<std::int32_t> 
 {
     static constexpr DBTypeName postgres_name = "integer";
 };
@@ -50,7 +50,12 @@ namespace {
     };
 
     const userver::storages::postgres::Query kFindGame {
-        ""
+        "SELECT "
+        "  id, igdb_id, name, slug, summary, rating, hypes, "
+        "  first_release_date, release_dates, cover_url, artwork_urls, screenshots, "
+        "  genres, themes, platforms, created_at, updated_at "
+        "FROM playhub.games "
+        "WHERE name ILIKE $1"
     };
 }
 
@@ -58,28 +63,20 @@ namespace {
 pg::PostgresManager::PostgresManager(userver::storages::postgres::ClusterPtr pg_cluster)
     : pg_cluster_(std::move(pg_cluster)) {}
 
-entities::GamePostgres pg::PostgresManager::CreateGame(
-    std::string_view igdb_id,                     std::string_view name,
-    std::string_view slug,                        std::string_view summary,
-    double rating,                                std::uint32_t hypes,
-    std::string_view firstReleaseDate,            const std::vector<std::string>& kReleaseDates,
-    std::string_view coverUrl,                    const std::vector<std::string>& kArtworkUrls,
-    const std::vector<std::string>& kScreenshots, const std::vector<std::string>& kGenres,
-    const std::vector<std::string>& kThemes,      const std::vector<std::string>& kPlatforms
-) const
+entities::GamePostgres pg::PostgresManager::CreateGame(const entities::GameInfo& kGameIgdbInfo) const
 {
     try
     {
         const auto kResult = pg_cluster_->Execute(
             userver::storages::postgres::ClusterHostType::kMaster,
             kInsertGame,
-            igdb_id, name,
-            slug, summary,
-            rating, hypes,
-            firstReleaseDate, kReleaseDates,
-            coverUrl, kReleaseDates,
-            kScreenshots, kGenres,
-            kThemes, kPlatforms
+            kGameIgdbInfo.id, kGameIgdbInfo.name,
+            kGameIgdbInfo.slug, kGameIgdbInfo.summary,
+            kGameIgdbInfo.rating, kGameIgdbInfo.hypes,
+            kGameIgdbInfo.firstReleaseDate, kGameIgdbInfo.releaseDates,
+            kGameIgdbInfo.coverUrl, kGameIgdbInfo.artworkUrls,
+            kGameIgdbInfo.screenshots, kGameIgdbInfo.genres,
+            kGameIgdbInfo.themes, kGameIgdbInfo.platforms
         );
 
         return kResult.AsSingleRow<entities::GamePostgres>(userver::storages::postgres::kRowTag);
@@ -92,7 +89,7 @@ entities::GamePostgres pg::PostgresManager::CreateGame(
     return {};
 }
 
-entities::GamePostgres pg::PostgresManager::FindGame(std::string_view query, std::uint32_t limit) const
+pg::PostgresManager::GamesPostgres pg::PostgresManager::FindGame(std::string_view query, std::int32_t limit) const
 {
     try 
     {
@@ -102,9 +99,13 @@ entities::GamePostgres pg::PostgresManager::FindGame(std::string_view query, std
             query,
             limit
         );
+
+        return kResult.AsContainer<GamesPostgres>(userver::storages::postgres::kRowTag);
     }
     catch(const std::exception& e)
     {
         LOG_ERROR() << e.what() << '\n';
     }
+
+    return {};
 }
