@@ -104,7 +104,7 @@ game_service::GameServiceComponent::GameServiceComponent(
         pg::PostgresManager(
             context.FindComponent<userver::components::Postgres>("playhub-games-db").GetCluster()
         ),
-        igdb::IGDBManager("~/game-service/.env")
+        igdb::IGDBManager(config["env-file"].As<std::string>())
     ) { RegisterService(service_); }
 
 userver::yaml_config::Schema game_service::GameServiceComponent::GetStaticConfigSchema()
@@ -115,9 +115,12 @@ userver::yaml_config::Schema game_service::GameServiceComponent::GetStaticConfig
             description: Game gRPC service component
             additionalProperties: false
             properties:
-                game-prefix:tournament-manager
+                game-prefix:
                     type: string
                     description: game prefix
+                env-file:
+                    type: string
+                    description: Path to the .env file
                 database:
                     type: object
                     description: Database connection settings
