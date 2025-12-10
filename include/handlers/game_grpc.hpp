@@ -1,7 +1,7 @@
 #pragma once
 
 #include <userver/ugrpc/server/service_component_base.hpp>
-#include <service_service.usrv.pb.hpp>
+#include <games_service.usrv.pb.hpp>
 
 #include <repository/postgres_manager.hpp>
 #include <managers/igdb_manager.hpp>
