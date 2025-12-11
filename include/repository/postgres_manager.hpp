@@ -23,6 +23,8 @@ public:
     GamePostgres CreateGame(const GameInfo& kGameIgdbInfo) const;
     GamesPostgres FindGame(std::string_view query,
                            std::int32_t limit = 10) const;
+    GamesPostgres GetGameBySlug(std::string_view slug);
+    GamesPostgres GetGameByid(std::string_view postgresId);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
