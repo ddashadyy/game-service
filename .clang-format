@@ -1,7 +1,8 @@
 Language: Cpp
 BasedOnStyle: LLVM  
 
-# Жёсткие настройки для скобок
+Cpp11BracedListStyle: false
+
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterClass: true
@@ -16,25 +17,19 @@ BraceWrapping:
   SplitEmptyRecord: false
   SplitEmptyFunction: false
 
-# Конкретно для if-else
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 IndentCaseLabels: false
 
-# Отступы
 IndentWidth: 4
 TabWidth: 4
 UseTab: Never
 
-# Указатели
 PointerAlignment: Left
 ReferenceAlignment: Left
 
-# Шаблоны
 AlwaysBreakTemplateDeclarations: Yes
 SpaceAfterTemplateKeyword: true
-# SpacesInAngles: true
 
-# Модификаторы доступа
 AccessModifierOffset: -4
 ...
