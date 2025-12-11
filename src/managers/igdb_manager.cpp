@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <fmt/format.h>
 
+namespace igdb {
+
 namespace {
 constexpr std::string_view APIQuery =
     "fields name,summary,rating,genres.name,"
@@ -14,12 +16,12 @@ constexpr std::string_view APIQuery =
     "hypes,platforms.name,screenshots.url,slug,themes.name; ";
 }
 
-igdb::IGDBManager::IGDBManager()
+IGDBManager::IGDBManager()
     : clientId_(std::getenv("CLIENT_ID")),
       clientSecret_(std::getenv("CLIENT_SECRET"))
 {}
 
-std::optional<std::string> igdb::IGDBManager::GetTwitchToken() const
+std::optional<std::string> IGDBManager::GetTwitchToken() const
 {
     try
     {
@@ -28,12 +30,10 @@ std::optional<std::string> igdb::IGDBManager::GetTwitchToken() const
             "/oauth2/token?client_id=" + clientId_ + "&client_secret=" +
                 clientSecret_ + "&grant_type=client_credentials",
             http::verb::post, "",
-            {{"Content-Type", "application/x-www-form-urlencoded"}});
+            { { "Content-Type", "application/x-www-form-urlencoded" } });
 
         if (response.empty())
-        {
             return std::nullopt;
-        }
 
         return response;
     }
@@ -44,7 +44,7 @@ std::optional<std::string> igdb::IGDBManager::GetTwitchToken() const
     }
 }
 
-bool igdb::IGDBManager::Authenticate()
+bool IGDBManager::Authenticate()
 {
     if (cachedToken_ && std::chrono::system_clock::now() < tokenExpiry_)
     {
@@ -90,8 +90,8 @@ bool igdb::IGDBManager::Authenticate()
     }
 }
 
-igdb::IGDBManager::GamesInfo
-igdb::IGDBManager::SearchGames(std::string_view query, std::int32_t limit)
+IGDBManager::GamesInfo IGDBManager::SearchGames(std::string_view query,
+                                                std::int32_t limit)
 {
     if (!Authenticate())
     {
@@ -104,14 +104,14 @@ igdb::IGDBManager::SearchGames(std::string_view query, std::int32_t limit)
 
     const auto response = utils::PerformHttpRequest(
         "api.igdb.com", "443", "/v4/games", http::verb::post, body,
-        {{"Client-ID", clientId_},
-         {"Authorization", "Bearer " + accessToken_}});
+        { { "Client-ID", clientId_ },
+          { "Authorization", "Bearer " + accessToken_ } });
 
     return ParseGamesResponse(response);
 }
 
-igdb::IGDBManager::GamesInfo
-igdb::IGDBManager::GetGamesByGenre(std::string_view genre, std::int32_t limit)
+IGDBManager::GamesInfo IGDBManager::GetGamesByGenre(std::string_view genre,
+                                                    std::int32_t limit)
 {
     if (!Authenticate())
     {
@@ -124,14 +124,13 @@ igdb::IGDBManager::GetGamesByGenre(std::string_view genre, std::int32_t limit)
 
     const auto response = utils::PerformHttpRequest(
         "api.igdb.com", "443", "/v4/games", http::verb::post, body,
-        {{"Client-ID", clientId_},
-         {"Authorization", "Bearer " + accessToken_}});
+        { { "Client-ID", clientId_ },
+          { "Authorization", "Bearer " + accessToken_ } });
 
     return ParseGamesResponse(response);
 }
 
-igdb::IGDBManager::GamesInfo
-igdb::IGDBManager::GetTopRatedGames(std::int32_t limit)
+IGDBManager::GamesInfo IGDBManager::GetTopRatedGames(std::int32_t limit)
 {
     if (!Authenticate())
     {
@@ -146,14 +145,13 @@ igdb::IGDBManager::GetTopRatedGames(std::int32_t limit)
 
     const auto response = utils::PerformHttpRequest(
         "api.igdb.com", "443", "/v4/games", http::verb::post, body,
-        {{"Client-ID", clientId_},
-         {"Authorization", "Bearer " + accessToken_}});
+        { { "Client-ID", clientId_ },
+          { "Authorization", "Bearer " + accessToken_ } });
 
     return ParseGamesResponse(response);
 }
 
-igdb::IGDBManager::GamesInfo
-igdb::IGDBManager::GetUpcomingGames(std::int32_t limit)
+IGDBManager::GamesInfo IGDBManager::GetUpcomingGames(std::int32_t limit)
 {
     if (!Authenticate())
     {
@@ -169,14 +167,14 @@ igdb::IGDBManager::GetUpcomingGames(std::int32_t limit)
 
     const auto response = utils::PerformHttpRequest(
         "api.igdb.com", "443", "/v4/games", http::verb::post, body,
-        {{"Client-ID", clientId_},
-         {"Authorization", "Bearer " + accessToken_}});
+        { { "Client-ID", clientId_ },
+          { "Authorization", "Bearer " + accessToken_ } });
 
     return ParseGamesResponse(response);
 }
 
-igdb::IGDBManager::GamesInfo
-igdb::IGDBManager::ParseGamesResponse(std::string_view response) const
+IGDBManager::GamesInfo
+IGDBManager::ParseGamesResponse(std::string_view response) const
 {
     std::vector<entities::GameInfo> games;
 
@@ -317,3 +315,4 @@ igdb::IGDBManager::ParseGamesResponse(std::string_view response) const
 
     return games;
 }
+} // namespace igdb

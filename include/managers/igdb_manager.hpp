@@ -11,33 +11,34 @@
 
 namespace igdb {
 
-class IGDBManager final {
- public:
-  using GamesInfo = std::vector<entities::GameInfo>;
+class IGDBManager final
+{
+public:
+    using GamesInfo = std::vector<entities::GameInfo>;
 
-  IGDBManager();
-  ~IGDBManager() = default;
+    IGDBManager();
+    ~IGDBManager() = default;
 
-  std::optional<std::string> GetTwitchToken() const;
+    std::optional<std::string> GetTwitchToken() const;
 
-  bool Authenticate();
+    bool Authenticate();
 
-  GamesInfo SearchGames(std::string_view query, std::int32_t limit = 10);
-  GamesInfo GetGamesByGenre(std::string_view genre, std::int32_t limit = 20);
-  GamesInfo GetTopRatedGames(std::int32_t limit = 10);
-  GamesInfo GetUpcomingGames(std::int32_t limit = 10);
+    GamesInfo SearchGames(std::string_view query, std::int32_t limit = 10);
+    GamesInfo GetGamesByGenre(std::string_view genre, std::int32_t limit = 20);
+    GamesInfo GetTopRatedGames(std::int32_t limit = 10);
+    GamesInfo GetUpcomingGames(std::int32_t limit = 10);
 
- private:
-  GamesInfo ParseGamesResponse(std::string_view response) const;
+private:
+    GamesInfo ParseGamesResponse(std::string_view response) const;
 
-  mutable std::optional<std::string> cachedToken_;
-  mutable std::chrono::system_clock::time_point tokenExpiry_;
+    mutable std::optional<std::string> cachedToken_;
+    mutable std::chrono::system_clock::time_point tokenExpiry_;
 
-  std::string clientId_;
-  std::string clientSecret_;
-  std::string accessToken_;
+    std::string clientId_;
+    std::string clientSecret_;
+    std::string accessToken_;
 
-  static constexpr std::uint32_t kTokenExpiryBufferSeconds = 300;
+    static constexpr std::uint32_t kTokenExpiryBufferSeconds = 300;
 };
 
-}  // namespace igdb
+} // namespace igdb
