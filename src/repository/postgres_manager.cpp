@@ -13,7 +13,8 @@ struct userver::storages::postgres::io::CppToUserPg<std::int32_t>
     static constexpr DBTypeName postgres_name = "integer";
 };
 
-namespace {
+namespace pg {
+
 const userver::storages::postgres::Query kInsertGame{
     "INSERT INTO playhub.games ("
     "  igdb_id, name, slug, summary, rating, hypes, "
@@ -46,7 +47,8 @@ const userver::storages::postgres::Query kInsertGame{
     "  id, igdb_id, name, slug, summary, rating, hypes, "
     "  first_release_date, release_dates, cover_url, artwork_urls, "
     "screenshots, "
-    "  genres, themes, platforms, created_at, updated_at"};
+    "  genres, themes, platforms, created_at, updated_at"
+};
 
 const userver::storages::postgres::Query kFindGame{
     "SELECT "
@@ -56,16 +58,16 @@ const userver::storages::postgres::Query kFindGame{
     "  genres, themes, platforms, created_at, updated_at "
     "FROM playhub.games "
     "WHERE name ILIKE $1 "
-    "LIMIT $2"};
-} // namespace
+    "LIMIT $2"
+};
 
-pg::PostgresManager::PostgresManager(
+PostgresManager::PostgresManager(
     userver::storages::postgres::ClusterPtr pg_cluster)
     : pg_cluster_(std::move(pg_cluster))
 {}
 
 entities::GamePostgres
-pg::PostgresManager::CreateGame(const entities::GameInfo& kGameIgdbInfo) const
+PostgresManager::CreateGame(const entities::GameInfo& kGameIgdbInfo) const
 {
     try
     {
@@ -89,8 +91,8 @@ pg::PostgresManager::CreateGame(const entities::GameInfo& kGameIgdbInfo) const
     return {};
 }
 
-pg::PostgresManager::GamesPostgres
-pg::PostgresManager::FindGame(std::string_view query, std::int32_t limit) const
+PostgresManager::GamesPostgres
+PostgresManager::FindGame(std::string_view query, std::int32_t limit) const
 {
     try
     {
@@ -108,3 +110,5 @@ pg::PostgresManager::FindGame(std::string_view query, std::int32_t limit) const
 
     return {};
 }
+
+} // namespace pg
