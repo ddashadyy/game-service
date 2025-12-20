@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS playhub.games (
     slug TEXT NOT NULL,
     summary TEXT,
     
-    rating DOUBLE PRECISION,
+    igdb_rating DOUBLE PRECISION,
+    playhub_rating DOUBLE PRECISION,
     hypes INTEGER DEFAULT 0,
     
     first_release_date TEXT,
