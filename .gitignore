@@ -17,4 +17,4 @@ CMakeUserPresets.json
 generated
 .env
 configs/config_vars.yaml
-third_party
+third_party/*
