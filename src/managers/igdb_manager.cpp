@@ -9,12 +9,22 @@
 
 namespace igdb {
 
-namespace {
-constexpr std::string_view APIQuery =
+constexpr std::string_view kSearchGameQuery =
     "fields name,summary,rating,genres.name,"
     "first_release_date,artworks.url,cover.url,"
     "hypes,platforms.name,screenshots.url,slug,themes.name; ";
-}
+
+constexpr std::string_view kSearchGameBySlug = "where slug = \"{}\";";
+
+constexpr std::string_view kSearchGameByGenre =
+    "where genres.name = \"{}\"; sort rating desc; limit {};";
+
+constexpr std::string_view kSearchTopRatedGames =
+    "where rating >= 75 & rating_count > 10; sort rating desc; limit {};";
+
+constexpr std::string_view kSearchUpcomingGames =
+    "where first_release_date > {} & first_release_date != null; sort "
+    "first_release_date asc; limit {};";
 
 IGDBManager::IGDBManager()
     : clientId_(std::getenv("CLIENT_ID")),
@@ -99,8 +109,27 @@ IGDBManager::GamesInfo IGDBManager::SearchGames(std::string_view query,
         return {};
     }
 
-    const auto body =
-        fmt::format("{}search \"{}\"; limit {};", APIQuery, query, limit);
+    const auto body = fmt::format("{}search \"{}\"; limit {};",
+                                  kSearchGameQuery, query, limit);
+
+    const auto response = utils::PerformHttpRequest(
+        "api.igdb.com", "443", "/v4/games", http::verb::post, body,
+        { { "Client-ID", clientId_ },
+          { "Authorization", "Bearer " + accessToken_ } });
+
+    return ParseGamesResponse(response);
+}
+
+IGDBManager::GamesInfo IGDBManager::GetGameBySlug(std::string_view slug)
+{
+    if (!Authenticate())
+    {
+        std::cerr << "Authentication failed in GetGameBySlug" << std::endl;
+        return {};
+    }
+
+    const auto body = fmt::format("{}{}", kSearchGameQuery,
+                                  fmt::format(kSearchGameBySlug, slug));
 
     const auto response = utils::PerformHttpRequest(
         "api.igdb.com", "443", "/v4/games", http::verb::post, body,
@@ -119,8 +148,8 @@ IGDBManager::GamesInfo IGDBManager::GetGamesByGenre(std::string_view genre,
         return {};
     }
 
-    const auto body = fmt::format("{}where genres.name = \"{}\"; limit {};",
-                                  APIQuery, genre, limit);
+    const auto queryPart = fmt::format(kSearchGameByGenre, genre, limit);
+    const auto body = fmt::format("{}{}", kSearchGameQuery, queryPart);
 
     const auto response = utils::PerformHttpRequest(
         "api.igdb.com", "443", "/v4/games", http::verb::post, body,
@@ -138,10 +167,8 @@ IGDBManager::GamesInfo IGDBManager::GetTopRatedGames(std::int32_t limit)
         return {};
     }
 
-    const auto body = fmt::format("{}where rating > 75; "
-                                  "sort rating desc; "
-                                  "limit {};",
-                                  APIQuery, limit);
+    const auto queryPart = fmt::format(kSearchTopRatedGames, limit);
+    const auto body = fmt::format("{}{}", kSearchGameQuery, queryPart);
 
     const auto response = utils::PerformHttpRequest(
         "api.igdb.com", "443", "/v4/games", http::verb::post, body,
@@ -160,10 +187,9 @@ IGDBManager::GamesInfo IGDBManager::GetUpcomingGames(std::int32_t limit)
     }
 
     std::time_t now = std::time(nullptr);
-    const auto body = fmt::format("{}where first_release_date > {}; "
-                                  "sort first_release_date asc; "
-                                  "limit {};",
-                                  APIQuery, now, limit);
+
+    const auto queryPart = fmt::format(kSearchUpcomingGames, now, limit);
+    const auto body = fmt::format("{}{}", kSearchGameQuery, queryPart);
 
     const auto response = utils::PerformHttpRequest(
         "api.igdb.com", "443", "/v4/games", http::verb::post, body,

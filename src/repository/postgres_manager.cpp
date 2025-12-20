@@ -61,6 +61,53 @@ const userver::storages::postgres::Query kFindGame{
     "LIMIT $2"
 };
 
+const userver::storages::postgres::Query kGetGameBySlug{
+    "SELECT "
+    "  id, igdb_id, name, slug, summary, rating, hypes, "
+    "  first_release_date, release_dates, cover_url, artwork_urls, "
+    "screenshots, "
+    "  genres, themes, platforms, created_at, updated_at "
+    "FROM playhub.games "
+    "WHERE slug = $1"
+};
+
+const userver::storages::postgres::Query kGetGamesByGenre{
+    "SELECT "
+    "  id, igdb_id, name, slug, summary, rating, hypes, "
+    "  first_release_date, release_dates, cover_url, artwork_urls, "
+    "screenshots, "
+    "  genres, themes, platforms, created_at, updated_at "
+    "FROM playhub.games "
+    "WHERE $1 = ANY(genres) " 
+    "ORDER BY rating DESC NULLS LAST "
+    "LIMIT $2"
+};
+
+const userver::storages::postgres::Query kGetTopRatedGames{
+    "SELECT "
+    "  id, igdb_id, name, slug, summary, rating, hypes, "
+    "  first_release_date, release_dates, cover_url, artwork_urls, "
+    "screenshots, "
+    "  genres, themes, platforms, created_at, updated_at "
+    "FROM playhub.games "
+    "WHERE rating >= 75 "
+    "ORDER BY rating DESC NULLS LAST "
+    "LIMIT $1"
+};
+
+const userver::storages::postgres::Query kGetUpcomingGames{
+    "SELECT "
+    "  id, igdb_id, name, slug, summary, rating, hypes, "
+    "  first_release_date, release_dates, cover_url, artwork_urls, "
+    "screenshots, "
+    "  genres, themes, platforms, created_at, updated_at "
+    "FROM playhub.games "
+    "WHERE first_release_date IS NOT NULL "
+    "  AND CAST(first_release_date AS TIMESTAMP) > NOW() "
+    "ORDER BY CAST(first_release_date AS TIMESTAMP) ASC "
+    "LIMIT $1"
+};
+
 PostgresManager::PostgresManager(
     userver::storages::postgres::ClusterPtr pg_cluster)
     : pg_cluster_(std::move(pg_cluster))
@@ -108,6 +155,84 @@ PostgresManager::FindGame(std::string_view query, std::int32_t limit) const
         LOG_ERROR() << e.what() << '\n';
     }
 
+    return {};
+}
+
+PostgresManager::GamesPostgres
+PostgresManager::GetGameBySlug(std::string_view slug) const
+{
+    try
+    {
+        const auto kResult = pg_cluster_->Execute(
+            userver::storages::postgres::ClusterHostType::kMaster,
+            pg::kGetGameBySlug, slug);
+
+        return kResult.AsContainer<GamesPostgres>(
+            userver::storages::postgres::kRowTag);
+    }
+    catch (const std::exception& e)
+    {
+        LOG_ERROR() << "Error getting game by slug: " << e.what() << '\n';
+    }
+
+    return {};
+}
+
+PostgresManager::GamesPostgres
+PostgresManager::GetGamesByGenre(std::string_view genre,
+                                 std::int32_t limit) const
+{
+    try
+    {
+        const auto kResult = pg_cluster_->Execute(
+            userver::storages::postgres::ClusterHostType::kMaster,
+            pg::kGetGamesByGenre, genre, limit);
+
+        return kResult.AsContainer<GamesPostgres>(
+            userver::storages::postgres::kRowTag);
+    }
+    catch (const std::exception& e)
+    {
+        LOG_ERROR() << "Error getting games by genre: " << e.what() << '\n';
+    }
+    return {};
+}
+
+PostgresManager::GamesPostgres
+PostgresManager::GetTopRatedGames(std::int32_t limit) const
+{
+    try
+    {
+        const auto kResult = pg_cluster_->Execute(
+            userver::storages::postgres::ClusterHostType::kMaster,
+            pg::kGetTopRatedGames, limit);
+
+        return kResult.AsContainer<GamesPostgres>(
+            userver::storages::postgres::kRowTag);
+    }
+    catch (const std::exception& e)
+    {
+        LOG_ERROR() << "Error getting top rated games: " << e.what() << '\n';
+    }
+    return {};
+}
+
+PostgresManager::GamesPostgres
+PostgresManager::GetUpcomingGames(std::int32_t limit) const
+{
+    try
+    {
+        const auto kResult = pg_cluster_->Execute(
+            userver::storages::postgres::ClusterHostType::kMaster,
+            pg::kGetUpcomingGames, limit);
+
+        return kResult.AsContainer<GamesPostgres>(
+            userver::storages::postgres::kRowTag);
+    }
+    catch (const std::exception& e)
+    {
+        LOG_ERROR() << "Error getting upcoming games: " << e.what() << '\n';
+    }
     return {};
 }
 

@@ -20,20 +20,20 @@ public:
     SearchGames(CallContext& context,
                 ::games::SearchGamesRequest&& request) override;
 
-    GetGameResult GetGame(CallContext& context,
-                          ::games::GetGameRequest&& request) override;
+    // GetGameResult GetGame(CallContext& context,
+    //                       ::games::GetGameRequest&& request) override;
 
-    GetGamesByGenreResult
-    GetGamesByGenre(CallContext& context,
-                    ::games::GetGamesByGenreRequest&& request) override;
+    // GetGamesByGenreResult
+    // GetGamesByGenre(CallContext& context,
+    //                 ::games::GetGamesByGenreRequest&& request) override;
 
-    GetTopRatedGamesResult
-    GetTopRatedGames(CallContext& context,
-                     ::games::GetDiscoveryRequest&& request) override;
+    // GetTopRatedGamesResult
+    // GetTopRatedGames(CallContext& context,
+    //                  ::games::GetDiscoveryRequest&& request) override;
 
-    GetUpcomingGamesResult
-    GetUpcomingGames(CallContext& context,
-                     ::games::GetDiscoveryRequest&& request) override;
+    // GetUpcomingGamesResult
+    // GetUpcomingGames(CallContext& context,
+    //                  ::games::GetDiscoveryRequest&& request) override;
                      
 private:
     void FillResponseWithPgData(::games::GamesListResponse& response,
