@@ -266,7 +266,7 @@ game_service::GameService::ListGames(CallContext& context,
     LOG_INFO() << "Limit: " << request.limit() << " Offset: " << request.offset();
 
     const uint32_t kLimit = request.limit() > 0 ? request.limit() : 10;
-    const uint32_t kOffset = request.offset() > 0 ? request.offset() : 10;
+    const uint32_t kOffset = request.offset();
 
     LOG_INFO() << "Code limit: " << kLimit << " code offset: " << kOffset;
 
