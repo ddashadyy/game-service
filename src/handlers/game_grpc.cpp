@@ -74,14 +74,6 @@ game_service::GameService::SearchGames(CallContext& context,
 game_service::GameService::GetGame(CallContext& context,
                                    ::games::GetGameRequest&& request)
 {
-    if (request.slug().empty())
-        return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
-                            "Slug cannot be empty");
-
-    if (request.game_id().empty())
-        return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
-                            "Game ID cannot be empty");
-
     std::optional<entities::GamePostgres> pg_game;
 
     try
