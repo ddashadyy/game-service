@@ -29,6 +29,5 @@ CREATE TABLE IF NOT EXISTS playhub.games (
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
 );
 
--- Опционально: индекс для поиска по igdb_id или slug
 CREATE INDEX IF NOT EXISTS idx_games_igdb_id ON games(igdb_id);
 CREATE INDEX IF NOT EXISTS idx_games_slug ON games(slug);
