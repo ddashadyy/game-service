@@ -245,10 +245,17 @@ IGDBManager::ParseGamesResponse(std::string_view response) const
                     !gameJson["summary"].is_null())
                     game.summary = gameJson["summary"].get<std::string>();
 
-                // rating
-                if (gameJson.contains("rating") &&
-                    !gameJson["rating"].is_null())
-                    game.igdb_rating = gameJson["rating"].get<double>();
+                // playhub_rating
+                if (gameJson.contains("playhub_rating") &&
+                    !gameJson["playhub_rating"].is_null())
+                    game.playhub_rating = gameJson["playhub_rating"].get<double>();
+                else
+                    game.playhub_rating = 0.0;
+
+                // igdb_rating
+                if (gameJson.contains("igdb_rating") &&
+                    !gameJson["igdb_rating"].is_null())
+                    game.igdb_rating = gameJson["igdb_rating"].get<double>();
                 else
                     game.igdb_rating = 0.0;
 
