@@ -74,9 +74,13 @@ game_service::GameService::SearchGames(CallContext& context,
 game_service::GameService::GetGame(CallContext& context,
                                    ::games::GetGameRequest&& request)
 {
-    if (!request.has_slug())
+    if (request.slug().empty())
         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
-                            "Query cannot be empty");
+                            "Slug cannot be empty");
+
+    if (request.game_id().empty())
+        return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
+                            "Game ID cannot be empty");
 
     std::optional<entities::GamePostgres> pg_game;
 
@@ -100,16 +104,7 @@ game_service::GameService::GetGame(CallContext& context,
 
             pg_game = pg_manager_.GetGameBySlug(kSlug);
 
-            if (pg_game)
-            {
-                auto igdb_game = igdb_manager_.GetGameBySlug(kSlug);
-
-                pg_game = pg_manager_.CreateGame(std::move(igdb_game.at(0)));
-
-                LOG_INFO() << "Game found in IGDB and saved to DB: " << kSlug;
-            }
-
-            else
+            if (!pg_game)
                 return grpc::Status(grpc::StatusCode::NOT_FOUND,
                                     "Game not found in DB or IGDB");
         }
