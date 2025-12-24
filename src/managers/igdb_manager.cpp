@@ -248,9 +248,9 @@ IGDBManager::ParseGamesResponse(std::string_view response) const
                 // rating
                 if (gameJson.contains("rating") &&
                     !gameJson["rating"].is_null())
-                    game.rating = gameJson["rating"].get<double>();
+                    game.igdb_rating = gameJson["rating"].get<double>();
                 else
-                    game.rating = 0.0;
+                    game.igdb_rating = 0.0;
 
                 // hypes
                 if (gameJson.contains("hypes") && !gameJson["hypes"].is_null())

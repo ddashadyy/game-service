@@ -1,12 +1,10 @@
 #pragma once
 
-#include <games_service.usrv.pb.hpp>
+#include <games/games_service.usrv.pb.hpp>
 #include <userver/ugrpc/server/service_component_base.hpp>
 
 #include <managers/igdb_manager.hpp>
 #include <repository/postgres_manager.hpp>
-
-// std
 
 namespace game_service {
 
@@ -20,24 +18,33 @@ public:
     SearchGames(CallContext& context,
                 ::games::SearchGamesRequest&& request) override;
 
-    // GetGameResult GetGame(CallContext& context,
-    //                       ::games::GetGameRequest&& request) override;
+    GetGameResult GetGame(CallContext& context,
+                          ::games::GetGameRequest&& request) override;
 
-    // GetGamesByGenreResult
-    // GetGamesByGenre(CallContext& context,
-    //                 ::games::GetGamesByGenreRequest&& request) override;
+    GetGamesByGenreResult
+    GetGamesByGenre(CallContext& context,
+                    ::games::GetGamesByGenreRequest&& request) override;
 
-    // GetTopRatedGamesResult
-    // GetTopRatedGames(CallContext& context,
-    //                  ::games::GetDiscoveryRequest&& request) override;
+    GetTopRatedGamesResult
+    GetTopRatedGames(CallContext& context,
+                     ::games::GetDiscoveryRequest&& request) override;
 
-    // GetUpcomingGamesResult
-    // GetUpcomingGames(CallContext& context,
-    //                  ::games::GetDiscoveryRequest&& request) override;
-                     
+    GetUpcomingGamesResult
+    GetUpcomingGames(CallContext& context,
+                     ::games::GetDiscoveryRequest&& request) override;
+
+    ListGamesResult ListGames(CallContext& context,
+                              ::games::ListGamesRequest&& request) override;
+
+    CalculateRatingResult
+    CalculateRating(CallContext& context,
+                    ::social::GetGameReviewsResponse&& request) override;
+
 private:
     void FillResponseWithPgData(::games::GamesListResponse& response,
                                 entities::GamePostgres&& pgData) const;
+    void FillGameProto(::games::Game* game,
+                       entities::GamePostgres&& pgData) const;
 
     std::string prefix_;
     pg::PostgresManager pg_manager_;

@@ -23,13 +23,16 @@ public:
     GamePostgres CreateGame(const GameInfo& kGameIgdbInfo) const;
     GamesPostgres FindGame(std::string_view query,
                            std::int32_t limit = 10) const;
-    GamesPostgres GetGameBySlug(std::string_view slug) const;
-    GamesPostgres GetGameByid(std::string_view postgresId) const;
+    std::optional<GamePostgres> GetGameBySlug(std::string_view slug) const;
+    std::optional<GamePostgres> GetGameByid(std::string_view postgresId) const;
     GamesPostgres GetGamesByGenre(std::string_view genre,
                                   std::int32_t limit) const;
     GamesPostgres GetTopRatedGames(std::int32_t limit) const;
     GamesPostgres GetUpcomingGames(std::int32_t limit) const;
 
+    GamesPostgres GetAllGames(std::int32_t limit, std::int32_t offset) const;
+
+    void UpdateGameRating(std::string_view game_id, double rating) const;
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
 };
