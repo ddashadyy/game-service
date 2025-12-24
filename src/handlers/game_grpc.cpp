@@ -319,8 +319,8 @@ game_service::GameService::CalculateRating(
 
         LOG_INFO() << "Updated rating for game " << game_id << ": "
                    << average_rating << " (based on " << count << " reviews)";
-
-        return grpc::Status(grpc::StatusCode::OK, "Updated");
+            
+        return google::protobuf::Empty{};
     }
     catch (const std::runtime_error& ex)
     {
