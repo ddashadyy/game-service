@@ -80,7 +80,7 @@ const userver::storages::postgres::Query kGetGameByPostgresId{
     "screenshots, "
     "  genres, themes, platforms, created_at, updated_at "
     "FROM playhub.games "
-    "WHERE id = $1"
+    "WHERE id = $1::uuid"
 };
 
 const userver::storages::postgres::Query kGetGamesByGenre{
@@ -134,7 +134,7 @@ const userver::storages::postgres::Query kGetAllGames{
 const userver::storages::postgres::Query kUpdateGameRating{
     "UPDATE playhub.games "
     "SET playhub_rating = $2, updated_at = NOW() "
-    "WHERE id = $1"
+    "WHERE id = $1::uuid"
 };
 
 PostgresManager::PostgresManager(
