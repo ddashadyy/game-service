@@ -96,6 +96,8 @@ game_service::GameService::GetGame(CallContext& context,
 
             pg_game = pg_manager_.GetGameBySlug(kSlug);
 
+            LOG_INFO() << "Game with id=" << boost::uuids::to_string(pg_game->id) << " Playhub rating: " << pg_game->playhub_rating;
+
             if (!pg_game)
                 return grpc::Status(grpc::StatusCode::NOT_FOUND,
                                     "Game not found in DB or IGDB");
@@ -262,6 +264,9 @@ game_service::GameService::GetUpcomingGames(
 game_service::GameService::ListGames(CallContext& context,
                                      ::games::ListGamesRequest&& request)
 {
+
+    LOG_INFO() << "Limit: " << request.limit() << " Offset: " << request.offset();
+
     const uint32_t kLimit = request.limit() > 0 ? request.limit() : 10;
     const uint32_t kOffset = request.offset() > 0 ? request.offset() : 10;
 
