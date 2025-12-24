@@ -8,6 +8,8 @@
 #include <userver/server/handlers/tests_control.hpp>
 #include <userver/testsuite/testsuite_support.hpp>
 
+#include <userver/clients/http/middlewares/pipeline_component.hpp>
+
 #include <userver/storages/postgres/component.hpp>
 #include <userver/ugrpc/server/component_list.hpp>
 
@@ -22,6 +24,7 @@ int main(int argc, char* argv[])
         .Append<userver::components::TestsuiteSupport>()
         .Append<userver::components::HttpClient>()
         .Append<userver::components::HttpClientCore>()
+        .Append<userver::clients::http::MiddlewarePipelineComponent>()
         .Append<userver::clients::dns::Component>()
         .Append<userver::server::handlers::TestsControl>()
         .AppendComponentList(userver::ugrpc::server::MinimalComponentList())
