@@ -36,13 +36,12 @@ public:
     ListGamesResult ListGames(CallContext& context,
                               ::games::ListGamesRequest&& request) override;
 
-    CalculateRatingResult
-    CalculateRating(CallContext& context,
-                    ::social::GetGameReviewsResponse&& request) override;
+    SetRatingResult SetRating(CallContext& context,
+                              ::games::RatingRequest&& request) override;
 
-private:
-    void FillResponseWithPgData(::games::GamesListResponse& response,
-                                entities::GamePostgres&& pgData) const;
+        private
+        : void FillResponseWithPgData(::games::GamesListResponse& response,
+                                      entities::GamePostgres&& pgData) const;
     void FillGameProto(::games::Game* game,
                        entities::GamePostgres&& pgData) const;
 

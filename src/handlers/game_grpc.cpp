@@ -250,7 +250,8 @@ game_service::GameService::ListGames(CallContext& context,
                                      ::games::ListGamesRequest&& request)
 {
 
-    LOG_INFO() << "Limit: " << request.limit() << " Offset: " << request.offset();
+    LOG_INFO() << "Limit: " << request.limit()
+               << " Offset: " << request.offset();
 
     const uint32_t kLimit = request.limit() > 0 ? request.limit() : 10;
     const uint32_t kOffset = request.offset();
@@ -280,53 +281,81 @@ game_service::GameService::ListGames(CallContext& context,
     }
 }
 
-::games::GameServiceBase::CalculateRatingResult
-game_service::GameService::CalculateRating(
-    CallContext& context, ::social::GetGameReviewsResponse&& request)
+::games::GameServiceBase::SetRatingResult
+game_service::GameService::SetRating(CallContext& context,
+                                     ::games::RatingRequest&& request)
 {
-    if (request.reviews().empty())
-        return google::protobuf::Empty{};
-
-    if (request.game_id().empty())
-        return google::protobuf::Empty{};
-
-    double total_score = 0.0;
-    std::uint32_t count = 0;
-    std::string game_id = request.game_id();
-
-    for (const auto& review : request.reviews())
-    {
-        total_score += review.rating();
-        count++;
-    }
-
-    if (count == 0 || game_id.empty())
-        return google::protobuf::Empty{};
-
-    double average_rating = total_score / count;
-
     try
     {
-        pg_manager_.UpdateGameRating(game_id, average_rating);
+        if (request.game_id().empty())
+            return google::protobuf::Empty{};
 
-        LOG_INFO() << "Updated rating for game " << game_id << ": "
-                   << average_rating << " (based on " << count << " reviews)";
-            
+        pg_manager_.UpdateGameRating(request.game_id(), request.rating());
+
         return google::protobuf::Empty{};
     }
     catch (const std::runtime_error& ex)
     {
-        LOG_ERROR() << "Invalid UUID in reviews: " << game_id;
+        LOG_ERROR() << "Invalid UUID in reviews: " << request.game_id();
         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
                             "Invalid game_id in reviews");
     }
     catch (const std::exception& ex)
     {
-        LOG_ERROR() << "Failed to update rating: " << ex.what();
+        LOG_ERROR() << "Rating is not updated " << ex.what();
         return grpc::Status(grpc::StatusCode::INTERNAL,
-                            "Database update failed");
+                            "Internal database error");
     }
 }
+
+// ::games::GameServiceBase::CalculateRatingResult
+// game_service::GameService::CalculateRating(
+//     CallContext& context, ::social::GetGameReviewsResponse&& request)
+// {
+//     if (request.reviews().empty())
+//         return google::protobuf::Empty{};
+
+//     if (request.game_id().empty())
+//         return google::protobuf::Empty{};
+
+//     double total_score = 0.0;
+//     std::uint32_t count = 0;
+//     std::string game_id = request.game_id();
+
+//     for (const auto& review : request.reviews())
+//     {
+//         total_score += review.rating();
+//         count++;
+//     }
+
+//     if (count == 0 || game_id.empty())
+//         return google::protobuf::Empty{};
+
+//     double average_rating = total_score / count;
+
+//     try
+//     {
+//         pg_manager_.UpdateGameRating(game_id, average_rating);
+
+//         LOG_INFO() << "Updated rating for game " << game_id << ": "
+//                    << average_rating << " (based on " << count << "
+//                    reviews)";
+
+//         return google::protobuf::Empty{};
+//     }
+//     catch (const std::runtime_error& ex)
+//     {
+//         LOG_ERROR() << "Invalid UUID in reviews: " << game_id;
+//         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
+//                             "Invalid game_id in reviews");
+//     }
+//     catch (const std::exception& ex)
+//     {
+//         LOG_ERROR() << "Failed to update rating: " << ex.what();
+//         return grpc::Status(grpc::StatusCode::INTERNAL,
+//                             "Database update failed");
+//     }
+// }
 
 void game_service::GameService::FillResponseWithPgData(
     ::games::GamesListResponse& response, entities::GamePostgres&& pgData) const
