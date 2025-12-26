@@ -14,13 +14,18 @@ constexpr std::string_view kSearchGameQuery =
     "first_release_date,artworks.url,cover.url,"
     "hypes,platforms.name,screenshots.url,slug,themes.name; ";
 
-constexpr std::string_view kSearchGameBySlug = "where slug = \"{}\" & category = (0,8,9);";
+constexpr std::string_view kSearchGameBySlug =
+    "where slug = \"{}\" & game_type = (0,8,9,10) & (game_status = null | "
+    "game_status != (6, 7));";
 
 constexpr std::string_view kSearchGameByGenre =
-    "where genres.name = \"{}\" & category = (0,8,9); sort rating desc; limit {};";
+    "where genres.name = \"{}\" & game_type = (0,8,9,10) & (game_status = null "
+    "| game_status != (6, 7)); sort rating desc; "
+    "limit {};";
 
 constexpr std::string_view kSearchUpcomingGames =
-    "where first_release_date > {} & hypes != null & category = (0,8,9); "
+    "where first_release_date > {} & hypes != null & game_type = (0,8,9,10) & "
+    "(game_status = null | game_status != (6, 7)); "
     "sort hypes desc; "
     "limit {};";
 
@@ -107,8 +112,10 @@ IGDBManager::GamesInfo IGDBManager::SearchGames(std::string_view query,
         return {};
     }
 
-    const auto body = fmt::format("{}search \"{}\"; limit {};",
-                                  kSearchGameQuery, query, limit);
+    const auto body =
+        fmt::format("{}search \"{}\"; where game_type = (0,8,9,10) & "
+                    "(game_status = null | game_status != (6, 7)); limit {};",
+                    kSearchGameQuery, query, limit);
 
     const auto response = utils::PerformHttpRequest(
         "api.igdb.com", "443", "/v4/games", http::verb::post, body,
@@ -227,7 +234,8 @@ IGDBManager::ParseGamesResponse(std::string_view response) const
                 // playhub_rating
                 if (gameJson.contains("playhub_rating") &&
                     !gameJson["playhub_rating"].is_null())
-                    game.playhub_rating = gameJson["playhub_rating"].get<double>();
+                    game.playhub_rating =
+                        gameJson["playhub_rating"].get<double>();
                 else
                     game.playhub_rating = 0.0;
 
