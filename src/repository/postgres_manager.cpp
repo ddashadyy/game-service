@@ -102,8 +102,8 @@ const userver::storages::postgres::Query kGetTopRatedGames{
     "screenshots, "
     "  genres, themes, platforms, created_at, updated_at "
     "FROM playhub.games "
-    "WHERE hypes >= 75 "
-    "ORDER BY hypes DESC NULLS LAST "
+    "WHERE playhub_rating IS NOT NULL "      
+    "ORDER BY playhub_rating DESC NULLS LAST " 
     "LIMIT $1"
 };
 
