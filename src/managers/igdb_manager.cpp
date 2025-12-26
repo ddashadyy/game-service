@@ -14,10 +14,10 @@ constexpr std::string_view kSearchGameQuery =
     "first_release_date,artworks.url,cover.url,"
     "hypes,platforms.name,screenshots.url,slug,themes.name; ";
 
-constexpr std::string_view kSearchGameBySlug = "where slug = \"{}\";";
+constexpr std::string_view kSearchGameBySlug = "where slug = \"{}\" & category = (0,8,9);";
 
 constexpr std::string_view kSearchGameByGenre =
-    "where genres.name = \"{}\"; sort rating desc; limit {};";
+    "where genres.name = \"{}\" & category = (0,8,9); sort rating desc; limit {};";
 
 constexpr std::string_view kSearchUpcomingGames =
     "where first_release_date > {} & hypes != null & category = (0,8,9); "

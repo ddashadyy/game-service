@@ -110,13 +110,12 @@ const userver::storages::postgres::Query kGetTopRatedGames{
 const userver::storages::postgres::Query kGetUpcomingGames{
     "SELECT "
     "  id, igdb_id, name, slug, summary, igdb_rating, playhub_rating, hypes, "
-    "  first_release_date, release_dates, cover_url, artwork_urls, "
-    "screenshots, "
+    "  first_release_date, release_dates, cover_url, artwork_urls, screenshots, "
     "  genres, themes, platforms, created_at, updated_at "
     "FROM playhub.games "
     "WHERE first_release_date IS NOT NULL "
-    "  AND CAST(first_release_date AS TIMESTAMP) > NOW() "
-    "ORDER BY CAST(first_release_date AS TIMESTAMP) ASC "
+    "  AND CAST(NULLIF(first_release_date, 'N/A') AS TIMESTAMP) > NOW() "
+    "ORDER BY CAST(NULLIF(first_release_date, 'N/A') AS TIMESTAMP) ASC "
     "LIMIT $1"
 };
 
