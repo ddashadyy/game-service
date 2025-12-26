@@ -190,19 +190,6 @@ game_service::GameService::GetTopRatedGames(
             return response;
         }
 
-        const auto kIgdbResults = igdb_manager_.GetTopRatedGames(kLimit);
-
-        if (kIgdbResults.empty())
-            return response;
-
-        response.mutable_games()->Reserve(kIgdbResults.size());
-
-        for (const auto& igdb_game : kIgdbResults)
-        {
-            auto saved_game = pg_manager_.CreateGame(igdb_game);
-            FillResponseWithPgData(response, std::move(saved_game));
-        }
-
         return response;
     }
     catch (const std::exception& ex)
@@ -217,7 +204,7 @@ game_service::GameService::GetTopRatedGames(
 game_service::GameService::GetUpcomingGames(
     CallContext& context, ::games::GetDiscoveryRequest&& request)
 {
-    const uint32_t kLimit = request.limit() > 0 ? request.limit() : 10;
+    const uint32_t kLimit = request.limit() > 0 ? request.limit() : 5;
 
     ::games::GamesListResponse response;
 
