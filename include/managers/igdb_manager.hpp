@@ -2,7 +2,7 @@
 
 // project headers
 #include <structs/game_info.hpp>
-
+#include <managers/manager.hpp>
 // std
 #include <chrono>
 #include <cstdint>
@@ -11,11 +11,9 @@
 
 namespace igdb {
 
-class IGDBManager final
+class IGDBManager final : public IIGDBManager
 {
 public:
-    using GamesInfo = std::vector<entities::GameInfo>;
-
     IGDBManager();
     ~IGDBManager() = default;
 
@@ -23,10 +21,10 @@ public:
 
     bool Authenticate();
 
-    GamesInfo SearchGames(std::string_view query, std::int32_t limit = 10);
-    GamesInfo GetGameBySlug(std::string_view slug);
-    GamesInfo GetGamesByGenre(std::string_view genre, std::int32_t limit = 20);
-    GamesInfo GetUpcomingGames(std::int32_t limit = 5);
+    GamesInfo SearchGames(std::string_view query, std::int32_t limit = 10) override;
+    GamesInfo GetGameBySlug(std::string_view slug) override;
+    GamesInfo GetGamesByGenre(std::string_view genre, std::int32_t limit = 20) override;
+    GamesInfo GetUpcomingGames(std::int32_t limit = 5) override;
 
 private:
     GamesInfo ParseGamesResponse(std::string_view response) const;
