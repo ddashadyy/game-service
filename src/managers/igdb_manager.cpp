@@ -19,12 +19,10 @@ constexpr std::string_view kSearchGameBySlug = "where slug = \"{}\";";
 constexpr std::string_view kSearchGameByGenre =
     "where genres.name = \"{}\"; sort rating desc; limit {};";
 
-constexpr std::string_view kSearchTopRatedGames =
-    "where rating >= 75 & rating_count > 10; sort rating desc; limit {};";
-
 constexpr std::string_view kSearchUpcomingGames =
-    "where first_release_date > {} & first_release_date != null; sort "
-    "first_release_date asc; limit {};";
+    "where first_release_date > {} & hypes != null & category = (0,8,9); "
+    "sort hypes desc; "
+    "limit {};";
 
 IGDBManager::IGDBManager()
     : clientId_(std::getenv("CLIENT_ID")),
@@ -149,25 +147,6 @@ IGDBManager::GamesInfo IGDBManager::GetGamesByGenre(std::string_view genre,
     }
 
     const auto queryPart = fmt::format(kSearchGameByGenre, genre, limit);
-    const auto body = fmt::format("{}{}", kSearchGameQuery, queryPart);
-
-    const auto response = utils::PerformHttpRequest(
-        "api.igdb.com", "443", "/v4/games", http::verb::post, body,
-        { { "Client-ID", clientId_ },
-          { "Authorization", "Bearer " + accessToken_ } });
-
-    return ParseGamesResponse(response);
-}
-
-IGDBManager::GamesInfo IGDBManager::GetTopRatedGames(std::int32_t limit)
-{
-    if (!Authenticate())
-    {
-        std::cerr << "Authentication failed in GetTopRatedGames" << std::endl;
-        return {};
-    }
-
-    const auto queryPart = fmt::format(kSearchTopRatedGames, limit);
     const auto body = fmt::format("{}{}", kSearchGameQuery, queryPart);
 
     const auto response = utils::PerformHttpRequest(
