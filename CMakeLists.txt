@@ -28,6 +28,7 @@ FetchContent_MakeAvailable(json)
 
 add_library(igdb_api_client_lib STATIC
     include/managers/igdb_manager.hpp 
+    include/managers/manager.hpp 
     src/managers/igdb_manager.cpp
     
     include/parser/json_parser.hpp
@@ -57,6 +58,7 @@ target_include_directories(igdb_api_client_lib PRIVATE
 
 add_library(${PROJECT_NAME}_objs OBJECT
     include/repository/postgres_manager.hpp
+    include/repository/repository.hpp
     src/repository/postgres_manager.cpp
 
     include/handlers/game_grpc.hpp
@@ -90,11 +92,13 @@ target_link_libraries(${PROJECT_NAME}_objs PUBLIC social_proto)
 
 # The Service
 add_executable(${PROJECT_NAME} src/main.cpp)
-
-
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_objs)
-
 target_include_directories(${PROJECT_NAME}_objs PUBLIC ${GENERATED_ROOT})
+
+# Unittests
+add_executable(${PROJECT_NAME}-unittest tests/game_service_test.cpp)
+target_link_libraries(${PROJECT_NAME}-unittest ${PROJECT_NAME}_objs userver::utest userver::grpc-utest)
+add_google_tests(${PROJECT_NAME}-unittest)
 
 include(GNUInstallDirs)
 
