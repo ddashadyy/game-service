@@ -102,15 +102,16 @@ const userver::storages::postgres::Query kGetTopRatedGames{
     "screenshots, "
     "  genres, themes, platforms, created_at, updated_at "
     "FROM playhub.games "
-    "WHERE playhub_rating IS NOT NULL "      
-    "ORDER BY playhub_rating DESC NULLS LAST " 
+    "WHERE playhub_rating IS NOT NULL "
+    "ORDER BY playhub_rating DESC NULLS LAST "
     "LIMIT $1"
 };
 
 const userver::storages::postgres::Query kGetUpcomingGames{
     "SELECT "
     "  id, igdb_id, name, slug, summary, igdb_rating, playhub_rating, hypes, "
-    "  first_release_date, release_dates, cover_url, artwork_urls, screenshots, "
+    "  first_release_date, release_dates, cover_url, artwork_urls, "
+    "screenshots, "
     "  genres, themes, platforms, created_at, updated_at "
     "FROM playhub.games "
     "WHERE first_release_date IS NOT NULL "
@@ -208,7 +209,7 @@ PostgresManager::GetGameBySlug(std::string_view slug) const
 }
 
 std::optional<GamePostgres>
-PostgresManager::GetGameByid(std::string_view postgresId) const
+PostgresManager::GetGameById(std::string_view postgresId) const
 {
     try
     {

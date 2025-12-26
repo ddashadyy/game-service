@@ -16,10 +16,10 @@ void MoveToProto(Source& src, Destination* dst)
 } // namespace
 
 game_service::GameService::GameService(std::string prefix,
-                                       pg::PostgresManager manager,
-                                       igdb::IGDBManager igdb_manager)
-    : prefix_(std::move(prefix)), pg_manager_(std::move(manager)),
-      igdb_manager_(std::move(igdb_manager))
+                                       const pg::IGameRepository& manager,
+                                       igdb::IIGDBManager& igdb_manager)
+    : prefix_(std::move(prefix)), pg_manager_(manager),
+      igdb_manager_(igdb_manager)
 {}
 
 ::games::GameServiceBase::SearchGamesResult
@@ -80,7 +80,7 @@ game_service::GameService::GetGame(CallContext& context,
     {
         if (request.has_game_id())
         {
-            pg_game = pg_manager_.GetGameByid(request.game_id());
+            pg_game = pg_manager_.GetGameById(request.game_id());
 
             if (!pg_game)
                 return grpc::Status(grpc::StatusCode::NOT_FOUND,
@@ -308,55 +308,6 @@ game_service::GameService::SetRating(CallContext& context,
     }
 }
 
-// ::games::GameServiceBase::CalculateRatingResult
-// game_service::GameService::CalculateRating(
-//     CallContext& context, ::social::GetGameReviewsResponse&& request)
-// {
-//     if (request.reviews().empty())
-//         return google::protobuf::Empty{};
-
-//     if (request.game_id().empty())
-//         return google::protobuf::Empty{};
-
-//     double total_score = 0.0;
-//     std::uint32_t count = 0;
-//     std::string game_id = request.game_id();
-
-//     for (const auto& review : request.reviews())
-//     {
-//         total_score += review.rating();
-//         count++;
-//     }
-
-//     if (count == 0 || game_id.empty())
-//         return google::protobuf::Empty{};
-
-//     double average_rating = total_score / count;
-
-//     try
-//     {
-//         pg_manager_.UpdateGameRating(game_id, average_rating);
-
-//         LOG_INFO() << "Updated rating for game " << game_id << ": "
-//                    << average_rating << " (based on " << count << "
-//                    reviews)";
-
-//         return google::protobuf::Empty{};
-//     }
-//     catch (const std::runtime_error& ex)
-//     {
-//         LOG_ERROR() << "Invalid UUID in reviews: " << game_id;
-//         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
-//                             "Invalid game_id in reviews");
-//     }
-//     catch (const std::exception& ex)
-//     {
-//         LOG_ERROR() << "Failed to update rating: " << ex.what();
-//         return grpc::Status(grpc::StatusCode::INTERNAL,
-//                             "Database update failed");
-//     }
-// }
-
 void game_service::GameService::FillResponseWithPgData(
     ::games::GamesListResponse& response, entities::GamePostgres&& pgData) const
 {
@@ -392,13 +343,12 @@ game_service::GameServiceComponent::GameServiceComponent(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context)
     : userver::ugrpc::server::ServiceComponentBase(config, context),
-      service_(
-          config["game-prefix"].As<std::string>(),
-          pg::PostgresManager(context
-                                  .FindComponent<userver::components::Postgres>(
-                                      "playhub-games-db")
-                                  .GetCluster()),
-          igdb::IGDBManager())
+      pg_manager_(
+          context
+              .FindComponent<userver::components::Postgres>("playhub-games-db")
+              .GetCluster()),
+      igdb_manager_(), service_(config["game-prefix"].As<std::string>(),
+                                pg_manager_, igdb_manager_)
 {
     RegisterService(service_);
 }
