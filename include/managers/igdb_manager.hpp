@@ -26,8 +26,7 @@ public:
     GamesInfo SearchGames(std::string_view query, std::int32_t limit = 10);
     GamesInfo GetGameBySlug(std::string_view slug);
     GamesInfo GetGamesByGenre(std::string_view genre, std::int32_t limit = 20);
-    GamesInfo GetTopRatedGames(std::int32_t limit = 10);
-    GamesInfo GetUpcomingGames(std::int32_t limit = 10);
+    GamesInfo GetUpcomingGames(std::int32_t limit = 5);
 
 private:
     GamesInfo ParseGamesResponse(std::string_view response) const;
