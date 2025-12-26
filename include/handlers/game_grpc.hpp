@@ -11,8 +11,8 @@ namespace game_service {
 class GameService final : public ::games::GameServiceBase
 {
 public:
-    explicit GameService(std::string prefix, pg::PostgresManager manager,
-                         igdb::IGDBManager igdb_manager);
+    explicit GameService(std::string prefix, const pg::IGameRepository& manager,
+                         igdb::IIGDBManager& igdb_manager);
 
     SearchGamesResult
     SearchGames(CallContext& context,
@@ -39,15 +39,16 @@ public:
     SetRatingResult SetRating(CallContext& context,
                               ::games::RatingRequest&& request) override;
 
-        private
-        : void FillResponseWithPgData(::games::GamesListResponse& response,
-                                      entities::GamePostgres&& pgData) const;
+private:
+    void FillResponseWithPgData(::games::GamesListResponse& response,
+                                entities::GamePostgres&& pgData) const;
     void FillGameProto(::games::Game* game,
                        entities::GamePostgres&& pgData) const;
 
     std::string prefix_;
-    pg::PostgresManager pg_manager_;
-    igdb::IGDBManager igdb_manager_;
+    
+    const pg::IGameRepository& pg_manager_;
+    igdb::IIGDBManager& igdb_manager_;
 };
 
 class GameServiceComponent final
@@ -62,6 +63,10 @@ public:
     static userver::yaml_config::Schema GetStaticConfigSchema();
 
 private:
+
+    pg::PostgresManager pg_manager_;
+    igdb::IGDBManager igdb_manager_;
+
     GameService service_;
 };
 
