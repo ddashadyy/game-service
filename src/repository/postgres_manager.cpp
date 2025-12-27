@@ -127,7 +127,7 @@ const userver::storages::postgres::Query kGetAllGames{
     "screenshots, "
     "  genres, themes, platforms, created_at, updated_at "
     "FROM playhub.games "
-    "ORDER BY created_at DESC "
+    "$3 "
     "LIMIT $1 OFFSET $2"
 };
 
@@ -287,13 +287,34 @@ PostgresManager::GetUpcomingGames(std::int32_t limit) const
 }
 
 PostgresManager::GamesPostgres
-PostgresManager::GetAllGames(std::int32_t limit, std::int32_t offset) const
+PostgresManager::GetAllGames(std::int32_t limit, std::int32_t offset,
+                             ::games::FilterType filter) const
 {
     try
     {
+        std::string_view order_clause;
+        switch (filter)
+        {
+        case ::games::FilterType::FIRST_RELEASE_DATE:
+            order_clause = "ORDER BY first_release_date DESC";
+            break;
+        case ::games::FilterType::PLAYHUB_RATING:
+            order_clause = "ORDER BY playhub_rating DESC";
+            break;
+        case ::games::FilterType::GENRES:
+            order_clause = "ORDER BY genres ASC NULLS LAST";
+            break;
+        case ::games::FilterType::PLATFORMS:
+            order_clause = "ORDER BY platforms ASC NULLS LAST";
+            break;
+        default:
+            order_clause = "ORDER BY id ASC";
+            break;
+        }
+
         const auto kResult = pg_cluster_->Execute(
             userver::storages::postgres::ClusterHostType::kMaster,
-            pg::kGetAllGames, limit, offset);
+            pg::kGetAllGames, limit, offset, order_clause);
 
         return kResult.AsContainer<GamesPostgres>(
             userver::storages::postgres::kRowTag);

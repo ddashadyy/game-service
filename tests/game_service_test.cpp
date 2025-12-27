@@ -35,7 +35,9 @@ public:
     MOCK_METHOD(GamesPostgres, GetUpcomingGames, (std::int32_t limit),
                 (const, override));
     MOCK_METHOD(GamesPostgres, GetAllGames,
-                (std::int32_t limit, std::int32_t offset), (const, override));
+                (std::int32_t limit, std::int32_t offset,
+                 ::games::FilterType filter),
+                (const, override));
     MOCK_METHOD(void, UpdateGameRating,
                 (std::string_view game_id, double rating), (const, override));
 };
@@ -73,12 +75,12 @@ protected:
     game_service::GameService service_;
 };
 
-
-entities::GamePostgres CreateFakePostgresGame(std::string_view name) {
+entities::GamePostgres CreateFakePostgresGame(std::string_view name)
+{
     entities::GamePostgres game;
     game.id = boost::uuids::random_generator()();
     game.name = name;
-    game.slug = name; 
+    game.slug = name;
     return game;
 }
 
@@ -99,13 +101,14 @@ UTEST_F(GameServiceTest, SearchGamesFindsInIgdb)
 
     fake_igdb_response.push_back(game_info);
 
-    EXPECT_CALL(mock_igdb_, SearchGames(testing::HasSubstr("God of War"), testing::_))
+    EXPECT_CALL(mock_igdb_,
+                SearchGames(testing::HasSubstr("God of War"), testing::_))
         .WillOnce(testing::Return(fake_igdb_response));
 
     entities::GamePostgres fake_saved_game;
     fake_saved_game.id = boost::uuids::random_generator()();
     fake_saved_game.name = "God of War";
-    
+
     EXPECT_CALL(mock_repo_, CreateGame(testing::_))
         .WillOnce(testing::Return(fake_saved_game));
 
@@ -127,7 +130,8 @@ UTEST_F(GameServiceTest, GetGameByIdFound)
 
     // Настройка мока: БД находит игру по ID
     EXPECT_CALL(mock_repo_, GetGameById(testing::Eq(str_id)))
-        .WillOnce(testing::Return(std::optional<entities::GamePostgres>{fake_game}));
+        .WillOnce(testing::Return(
+            std::optional<entities::GamePostgres>{ fake_game }));
 
     // Вызов
     auto client = MakeClient<::games::GameServiceClient>();
@@ -148,13 +152,13 @@ UTEST_F(GameServiceTest, GetGameBySlugFound)
 
     // Настройка мока: БД находит игру по Slug
     EXPECT_CALL(mock_repo_, GetGameBySlug(testing::Eq("elden-ring")))
-        .WillOnce(testing::Return(std::optional<entities::GamePostgres>{fake_game}));
+        .WillOnce(testing::Return(
+            std::optional<entities::GamePostgres>{ fake_game }));
 
     auto client = MakeClient<::games::GameServiceClient>();
     auto response = client.GetGame(request);
 
     EXPECT_EQ(response.game().name(), "Elden Ring");
 }
-
 
 } // namespace test

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <games/games_service.usrv.pb.hpp>
+
 #include <structs/game_info.hpp>
 #include <structs/game_postgres.hpp>
 
@@ -29,8 +31,8 @@ public:
     virtual GamesPostgres GetTopRatedGames(std::int32_t limit) const = 0;
     virtual GamesPostgres GetUpcomingGames(std::int32_t limit) const = 0;
 
-    virtual GamesPostgres GetAllGames(std::int32_t limit,
-                                      std::int32_t offset) const = 0;
+    virtual GamesPostgres GetAllGames(std::int32_t limit, std::int32_t offset,
+                                      ::games::FilterType filter) const = 0;
 
     virtual void UpdateGameRating(std::string_view game_id,
                                   double rating) const = 0;
