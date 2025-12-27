@@ -3,7 +3,7 @@ DROP SCHEMA IF EXISTS playhub CASCADE;
 CREATE SCHEMA IF NOT EXISTS playhub;
 
 CREATE TABLE IF NOT EXISTS playhub.games (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY gen_random_uuid(),
     igdb_id TEXT NOT NULL,
     
     name TEXT NOT NULL,
