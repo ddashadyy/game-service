@@ -70,16 +70,8 @@ add_library(${PROJECT_NAME}_objs OBJECT
 target_link_libraries(${PROJECT_NAME}_objs PUBLIC userver::postgresql userver::grpc igdb_api_client_lib)
 
 set(PROTO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/third_party/playhub-proto/proto")
-set(SOCIAL_SERVICE_PROTO_FILE "${PROTO_ROOT}/social/social.proto")
 set(GAME_SERVICE_PROTO_FILE "${PROTO_ROOT}/games/games.proto")
 set(GENERATED_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/generated")
-
-userver_add_grpc_library(
-    social_proto
-    PROTOS ${SOCIAL_SERVICE_PROTO_FILE}
-    SOURCE_PATH ${PROTO_ROOT}
-    OUTPUT_PATH ${GENERATED_ROOT}
-)
 
 userver_add_grpc_library(
     ${PROJECT_NAME}_proto
@@ -88,7 +80,6 @@ userver_add_grpc_library(
     OUTPUT_PATH ${GENERATED_ROOT}
 )
 target_link_libraries(${PROJECT_NAME}_objs PUBLIC ${PROJECT_NAME}_proto)
-target_link_libraries(${PROJECT_NAME}_objs PUBLIC social_proto)
 
 # The Service
 add_executable(${PROJECT_NAME} src/main.cpp)
