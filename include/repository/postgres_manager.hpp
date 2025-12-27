@@ -36,7 +36,7 @@ public:
                               ::games::SortingType filter) const override;
 
     void UpdateGameRating(std::string_view game_id,
-                          double rating) const override;
+                          std::int32_t rating) const override;
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

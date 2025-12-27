@@ -40,7 +40,7 @@ public:
     MOCK_METHOD(std::vector<entities::GamePostgres>, GetAllGames,
                 (std::int32_t, std::int32_t, ::games::SortingType),
                 (const, override));
-    MOCK_METHOD(void, UpdateGameRating, (std::string_view, double),
+    MOCK_METHOD(void, UpdateGameRating, (std::string_view, std::int32_t),
                 (const, override));
 };
 
@@ -65,7 +65,7 @@ entities::GamePostgres CreateFakePostgresGame(std::string_view name)
     game.slug = name;
     game.igdb_id = "123";
     game.hypes = 100;
-    game.playhub_rating = 8.5;
+    game.playhub_rating = 42;
     return game;
 }
 

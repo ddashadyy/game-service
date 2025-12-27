@@ -19,8 +19,8 @@ struct GamePostgres
     std::string slug;
     std::string summary;
     
-    double igdb_rating;
-    double playhub_rating;
+    std::int32_t igdb_rating;
+    std::int32_t playhub_rating;
     std::int32_t hypes;
     
     std::string firstReleaseDate;

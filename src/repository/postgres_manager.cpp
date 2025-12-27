@@ -152,8 +152,7 @@ PostgresManager::CreateGame(const entities::GameInfo& kGameIgdbInfo) const
         const auto kResult = pg_cluster_->Execute(
             userver::storages::postgres::ClusterHostType::kMaster, kInsertGame,
             kGameIgdbInfo.id, kGameIgdbInfo.name, kGameIgdbInfo.slug,
-            kGameIgdbInfo.summary,
-            static_cast<std::int32_t>(kGameIgdbInfo.igdb_rating),
+            kGameIgdbInfo.summary, kGameIgdbInfo.igdb_rating,
             kGameIgdbInfo.hypes, kGameIgdbInfo.firstReleaseDate,
             kGameIgdbInfo.releaseDates, kGameIgdbInfo.coverUrl,
             kGameIgdbInfo.artworkUrls, kGameIgdbInfo.screenshots,
@@ -336,7 +335,7 @@ PostgresManager::GetAllGames(std::int32_t limit, std::int32_t offset,
 }
 
 void PostgresManager::UpdateGameRating(std::string_view game_id,
-                                       double rating) const
+                                       std::int32_t rating) const
 {
     try
     {

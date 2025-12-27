@@ -35,7 +35,7 @@ public:
                                       ::games::SortingType filter) const = 0;
 
     virtual void UpdateGameRating(std::string_view game_id,
-                                  double rating) const = 0;
+                                  std::int32_t rating) const = 0;
 };
 
 } // namespace pg
