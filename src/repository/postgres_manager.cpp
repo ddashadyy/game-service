@@ -145,12 +145,15 @@ PostgresManager::PostgresManager(
 entities::GamePostgres
 PostgresManager::CreateGame(const entities::GameInfo& kGameIgdbInfo) const
 {
+    LOG_DEBUG() << "igdb_rating " << kGameIgdbInfo.igdb_rating;
+
     try
     {
         const auto kResult = pg_cluster_->Execute(
             userver::storages::postgres::ClusterHostType::kMaster, kInsertGame,
             kGameIgdbInfo.id, kGameIgdbInfo.name, kGameIgdbInfo.slug,
-            kGameIgdbInfo.summary, kGameIgdbInfo.igdb_rating,
+            kGameIgdbInfo.summary,
+            static_cast<std::int32_t>(kGameIgdbInfo.igdb_rating),
             kGameIgdbInfo.hypes, kGameIgdbInfo.firstReleaseDate,
             kGameIgdbInfo.releaseDates, kGameIgdbInfo.coverUrl,
             kGameIgdbInfo.artworkUrls, kGameIgdbInfo.screenshots,
