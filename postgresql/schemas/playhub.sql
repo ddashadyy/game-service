@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS playhub.games (
     igdb_id TEXT NOT NULL,
     
     name TEXT NOT NULL,
-    slug TEXT NOT NULL,
+    slug TEXT NOT NULL, 
     summary TEXT,
     
     igdb_rating DOUBLE PRECISION,
@@ -29,5 +29,5 @@ CREATE TABLE IF NOT EXISTS playhub.games (
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_games_igdb_id ON games(igdb_id);
-CREATE INDEX IF NOT EXISTS idx_games_slug ON games(slug);
+CREATE INDEX IF NOT EXISTS idx_games_igdb_id ON playhub.games(igdb_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_games_slug ON playhub.games(slug);
