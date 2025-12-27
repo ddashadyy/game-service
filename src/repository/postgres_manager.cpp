@@ -306,9 +306,21 @@ PostgresManager::GetAllGames(std::int32_t limit, std::int32_t offset,
             break;
         }
 
+        std::string query_str = fmt::format(
+            "SELECT "
+            "  id, igdb_id, name, slug, summary, igdb_rating, playhub_rating, "
+            "hypes, "
+            "  first_release_date, release_dates, cover_url, artwork_urls, "
+            "  screenshots, "
+            "  genres, themes, platforms, created_at, updated_at "
+            "FROM playhub.games "
+            "ORDER BY {} DESC "
+            "LIMIT $1 OFFSET $2",
+            order_clause);
+
         const auto kResult = pg_cluster_->Execute(
             userver::storages::postgres::ClusterHostType::kMaster,
-            pg::kGetAllGames, limit, offset, order_clause);
+            userver::storages::postgres::Query(query_str), limit, offset);
 
         return kResult.AsContainer<GamesPostgres>(
             userver::storages::postgres::kRowTag);

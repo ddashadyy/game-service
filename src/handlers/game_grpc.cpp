@@ -257,6 +257,8 @@ game_service::GameService::ListGames(CallContext& context,
     const uint32_t kOffset = request.offset();
     const auto kSortingType = request.filter();
 
+    LOG_INFO() << "sorting type " << kSortingType;
+
     LOG_INFO() << "Code limit: " << kLimit << " code offset: " << kOffset;
 
     ::games::GamesListResponse response;
@@ -290,6 +292,8 @@ game_service::GameService::SetRating(CallContext& context,
     {
         if (request.game_id().empty())
             return google::protobuf::Empty{};
+
+        LOG_INFO() << "update rating" << request.rating() << request.game_id();
 
         pg_manager_.UpdateGameRating(request.game_id(), request.rating());
 
