@@ -127,7 +127,7 @@ const userver::storages::postgres::Query kGetAllGames{
     "screenshots, "
     "  genres, themes, platforms, created_at, updated_at "
     "FROM playhub.games "
-    "$3 "
+    "ORDER BY $3 DESC "
     "LIMIT $1 OFFSET $2"
 };
 
@@ -296,13 +296,13 @@ PostgresManager::GetAllGames(std::int32_t limit, std::int32_t offset,
         switch (filter)
         {
         case ::games::SortingType::FIRST_RELEASE_DATE:
-            order_clause = "ORDER BY first_release_date DESC";
+            order_clause = "first_release_date";
             break;
         case ::games::SortingType::PLAYHUB_RATING:
-            order_clause = "ORDER BY playhub_rating DESC";
+            order_clause = "playhub_rating";
             break;
         default:
-            order_clause = "ORDER BY id ASC";
+            order_clause = "playhub_rating";
             break;
         }
 
