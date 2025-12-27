@@ -38,7 +38,7 @@ public:
     MOCK_METHOD(std::vector<entities::GamePostgres>, GetUpcomingGames,
                 (std::int32_t), (const, override));
     MOCK_METHOD(std::vector<entities::GamePostgres>, GetAllGames,
-                (std::int32_t, std::int32_t, ::games::FilterType),
+                (std::int32_t, std::int32_t, ::games::SortingType),
                 (const, override));
     MOCK_METHOD(void, UpdateGameRating, (std::string_view, double),
                 (const, override));
@@ -327,13 +327,13 @@ UTEST_F(GameServiceTest, ListGames_WithFilter)
     ::games::ListGamesRequest request;
     request.set_limit(20);
     request.set_offset(0);
-    request.set_filter(::games::FilterType::PLAYHUB_RATING);
+    request.set_filter(::games::SortingType::PLAYHUB_RATING);
 
     std::vector<entities::GamePostgres> games;
     games.push_back(test::CreateFakePostgresGame("List Item"));
 
     EXPECT_CALL(mock_repo_,
-                GetAllGames(20, 0, ::games::FilterType::PLAYHUB_RATING))
+                GetAllGames(20, 0, ::games::SortingType::PLAYHUB_RATING))
         .WillOnce(Return(games));
 
     auto client = MakeClient<::games::GameServiceClient>();

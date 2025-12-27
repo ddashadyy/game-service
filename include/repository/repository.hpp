@@ -32,7 +32,7 @@ public:
     virtual GamesPostgres GetUpcomingGames(std::int32_t limit) const = 0;
 
     virtual GamesPostgres GetAllGames(std::int32_t limit, std::int32_t offset,
-                                      ::games::FilterType filter) const = 0;
+                                      ::games::SortingType filter) const = 0;
 
     virtual void UpdateGameRating(std::string_view game_id,
                                   double rating) const = 0;

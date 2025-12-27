@@ -255,7 +255,7 @@ game_service::GameService::ListGames(CallContext& context,
 
     const uint32_t kLimit = request.limit() > 0 ? request.limit() : 10;
     const uint32_t kOffset = request.offset();
-    const auto kFilterType = request.filter();
+    const auto kSortingType = request.filter();
 
     LOG_INFO() << "Code limit: " << kLimit << " code offset: " << kOffset;
 
@@ -263,7 +263,7 @@ game_service::GameService::ListGames(CallContext& context,
 
     try
     {
-        auto pg_games = pg_manager_.GetAllGames(kLimit, kOffset, kFilterType);
+        auto pg_games = pg_manager_.GetAllGames(kLimit, kOffset, kSortingType);
 
         if (pg_games.empty())
             return response;

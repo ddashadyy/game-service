@@ -33,7 +33,7 @@ public:
     GamesPostgres GetUpcomingGames(std::int32_t limit) const override;
 
     GamesPostgres GetAllGames(std::int32_t limit, std::int32_t offset,
-                              ::games::FilterType filter) const override;
+                              ::games::SortingType filter) const override;
 
     void UpdateGameRating(std::string_view game_id,
                           double rating) const override;

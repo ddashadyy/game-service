@@ -288,24 +288,18 @@ PostgresManager::GetUpcomingGames(std::int32_t limit) const
 
 PostgresManager::GamesPostgres
 PostgresManager::GetAllGames(std::int32_t limit, std::int32_t offset,
-                             ::games::FilterType filter) const
+                             ::games::SortingType filter) const
 {
     try
     {
         std::string_view order_clause;
         switch (filter)
         {
-        case ::games::FilterType::FIRST_RELEASE_DATE:
+        case ::games::SortingType::FIRST_RELEASE_DATE:
             order_clause = "ORDER BY first_release_date DESC";
             break;
-        case ::games::FilterType::PLAYHUB_RATING:
+        case ::games::SortingType::PLAYHUB_RATING:
             order_clause = "ORDER BY playhub_rating DESC";
-            break;
-        case ::games::FilterType::GENRES:
-            order_clause = "ORDER BY genres ASC NULLS LAST";
-            break;
-        case ::games::FilterType::PLATFORMS:
-            order_clause = "ORDER BY platforms ASC NULLS LAST";
             break;
         default:
             order_clause = "ORDER BY id ASC";
