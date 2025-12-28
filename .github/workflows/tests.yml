@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Fix git safe directory
-        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Install dependencies
         run: |
@@ -46,28 +46,17 @@ jobs:
 
       - name: Run Tests
         working-directory: build
-
-        run: ctest --output-on-failure || true
-
-      - name: Debug Coverage Files
-        run: |
-          echo "Checking for .gcno files (compile time):"
-          find . -name "*.gcno" | head -n 5
-          echo "Checking for .gcda files (runtime):"
-          find . -name "*.gcda" | head -n 5
+        env:
+          USERVER_ENABLE_STACK_USAGE_MONITOR: 0
+          USERVER_GTEST_ENABLE_STACK_USAGE_MONITOR: 0
+        run: ctest --output-on-failure
 
       - name: Generate Coverage Report
         run: |
-        
-          echo "Search for .gcda files:"
-          find build -name "*.gcda" | head -n 5
-          
-        
           echo '#!/bin/bash' > llvm-gcov.sh
           echo 'exec llvm-cov gcov "$@"' >> llvm-gcov.sh
           chmod +x llvm-gcov.sh
           
-        
           lcov --gcov-tool "$PWD/llvm-gcov.sh" --capture --directory build --output-file build/coverage.info --ignore-errors gcov
           
           rm llvm-gcov.sh
@@ -91,3 +80,10 @@ jobs:
           echo "------------------------------------------------------------------"
           echo "Coverage report generated: file://$PWD/coverage_report/index.html"
           echo "------------------------------------------------------------------"
+
+      - name: Upload Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage_report/
+          retention-days: 7
