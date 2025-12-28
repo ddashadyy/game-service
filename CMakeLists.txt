@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.12...3.31)
 
-set(CMAKE_C_COMPILER "clang")
-set(CMAKE_CXX_COMPILER "clang++")
-
 project(game-service CXX)
 
 option(ENABLE_COVERAGE "Enable code coverage metrics" OFF)
