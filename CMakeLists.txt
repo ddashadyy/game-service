@@ -87,8 +87,34 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_objs)
 target_include_directories(${PROJECT_NAME}_objs PUBLIC ${GENERATED_ROOT})
 
 # Unittests
-add_executable(${PROJECT_NAME}-unittest tests/game_service_test.cpp)
-target_link_libraries(${PROJECT_NAME}-unittest ${PROJECT_NAME}_objs userver::utest userver::grpc-utest)
+add_library(${PROJECT_NAME}_tests OBJECT
+    tests/game_service_test.cpp
+    tests/json_parser_test.cpp
+    tests/utils_test.cpp
+)
+
+target_include_directories(${PROJECT_NAME}_tests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${GENERATED_ROOT} 
+)
+
+target_link_libraries(${PROJECT_NAME}_tests PUBLIC
+    userver::utest
+    nlohmann_json::nlohmann_json
+    ${PROJECT_NAME}_proto
+)
+
+add_executable(${PROJECT_NAME}-unittest)
+target_link_libraries(${PROJECT_NAME}-unittest
+    PRIVATE
+    ${PROJECT_NAME}_tests
+    ${PROJECT_NAME}_objs
+    igdb_api_client_lib      
+    userver::utest
+    userver::grpc-utest
+)
+
 add_google_tests(${PROJECT_NAME}-unittest)
 
 include(GNUInstallDirs)
