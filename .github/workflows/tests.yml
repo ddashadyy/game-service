@@ -43,19 +43,30 @@ jobs:
 
       - name: Run Tests
         working-directory: build
+
         run: ctest --output-on-failure || true
+
+      - name: Debug Coverage Files
+        run: |
+          echo "Checking for .gcno files (compile time):"
+          find . -name "*.gcno" | head -n 5
+          echo "Checking for .gcda files (runtime):"
+          find . -name "*.gcda" | head -n 5
 
       - name: Generate Coverage Report
         run: |
-          which llvm-cov || echo "llvm-cov still not found!"
-          llvm-cov --version || true
-
+        
           echo '#!/bin/bash' > llvm-gcov.sh
           echo 'exec llvm-cov gcov "$@"' >> llvm-gcov.sh
           chmod +x llvm-gcov.sh
-      
-          lcov --gcov-tool $(pwd)/llvm-gcov.sh --capture --directory build --output-file coverage.info
 
+          
+          lcov --gcov-tool $(pwd)/llvm-gcov.sh --capture --directory . --output-file coverage.info --ignore-errors source || true
+
+          
+          ls -l coverage.info || echo "coverage.info not created"
+
+        
           lcov --remove coverage.info \
             '/usr/*' \
             '*/_deps/*' \
@@ -67,10 +78,10 @@ jobs:
             '*/include/managers/*' \
             '*/include/repository/*' \
             '*/include/structs/*' \
-            --output-file coverage_cleaned.info
+            --output-file coverage_cleaned.info --ignore-errors unused
 
-          # 4. Генерируем HTML
-          genhtml coverage_cleaned.info --output-directory coverage_report
+        
+          genhtml coverage_cleaned.info --output-directory coverage_report --ignore-errors source
 
       - name: Upload Coverage Artifact
         uses: actions/upload-artifact@v4
