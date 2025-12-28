@@ -16,7 +16,7 @@ public:
     
     static OptString ExtractAccessToken(std::string_view jsonResponse);
     static OptString ExtractTokenType(std::string_view jsonResponse);
-    OptUint32 ExtractExpiresIn(std::string_view jsonResponse);
+    static OptUint32 ExtractExpiresIn(std::string_view jsonResponse);
 
     template <typename T>
     static std::optional<T> ExtractField(std::string_view jsonResponse,
