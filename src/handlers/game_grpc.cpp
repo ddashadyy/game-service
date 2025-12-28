@@ -3,6 +3,8 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <userver/storages/postgres/component.hpp>
 #include <userver/storages/postgres/database.hpp>
+
+#include <tools/utils.hpp>
 namespace {
 
 template <typename Source, typename Destination>
@@ -335,6 +337,9 @@ void game_service::GameService::FillGameProto(
 
     game->set_first_release_date(std::move(pgData.firstReleaseDate));
     game->set_cover_url(std::move(pgData.coverUrl));
+
+    *game->mutable_created_at() = utils::TimePointToProtobuf(pgData.created_at);
+    *game->mutable_updated_at() = utils::TimePointToProtobuf(pgData.updated_at);
 
     MoveToProto(pgData.releaseDates, game->mutable_release_dates());
     MoveToProto(pgData.artworkUrls, game->mutable_artwork_urls());

@@ -9,6 +9,11 @@
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
 
+// userver
+#include <google/protobuf/timestamp.pb.h>
+#include <userver/storages/postgres/io/chrono.hpp>
+
+
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace net = boost::asio;
@@ -26,5 +31,8 @@ const std::string PerformHttpRequest(
 const std::string TimestampToString(time_t timestamp);
 
 std::string ForceOriginalQuality(const std::string& url);
+
+::google::protobuf::Timestamp TimePointToProtobuf(
+    const userver::storages::postgres::TimePointWithoutTz& time_point);
 
 } // namespace utils

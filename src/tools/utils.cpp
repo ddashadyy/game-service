@@ -5,6 +5,9 @@
 #include <iostream>
 #include <regex>
 
+//userver
+#include <userver/utils/datetime.hpp>
+
 const std::string utils::PerformHttpRequest(
     std::string_view host, std::string_view port, std::string_view target,
     http::verb method, std::string_view body,
@@ -91,4 +94,21 @@ std::string utils::ForceOriginalQuality(const std::string& url)
 {
     std::regex size_pattern("/t_[a-zA-Z0-9_]+/");
     return "https:" + std::regex_replace(url, size_pattern, "/t_original/");
+}
+
+::google::protobuf::Timestamp utils::TimePointToProtobuf(
+    const userver::storages::postgres::TimePointWithoutTz& time_point)
+{
+    const auto time_string = userver::utils::datetime::Timestring(time_point);
+    const auto system_time = userver::utils::datetime::Stringtime(time_string);
+
+    const auto seconds_since_epoch =
+        std::chrono::duration_cast<std::chrono::seconds>(
+            system_time.time_since_epoch())
+            .count();
+
+    ::google::protobuf::Timestamp timestamp;
+    timestamp.set_seconds(seconds_since_epoch);
+
+    return timestamp;
 }
