@@ -18,7 +18,7 @@
 
 using namespace testing;
 
-namespace test {
+namespace game_service::test {
 
 class MockGameRepository : public pg::IGameRepository
 {
@@ -76,8 +76,8 @@ class GameServiceTest : public userver::ugrpc::tests::ServiceFixtureBase
 protected:
     std::string prefix_{ "game-prefix" };
 
-    test::MockGameRepository mock_repo_;
-    test::MockIGDBManager mock_igdb_;
+    game_service::test::MockGameRepository mock_repo_;
+    game_service::test::MockIGDBManager mock_igdb_;
 
     game_service::GameService service_;
 
@@ -96,7 +96,7 @@ UTEST_F(GameServiceTest, SearchGames_FoundInDb)
     request.set_limit(5);
 
     std::vector<entities::GamePostgres> db_games;
-    db_games.push_back(test::CreateFakePostgresGame("The Witcher 3"));
+    db_games.push_back(game_service::test::CreateFakePostgresGame("The Witcher 3"));
 
     EXPECT_CALL(mock_repo_, FindGame(testing::Eq("Witcher"), testing::Eq(5)))
         .WillOnce(testing::Return(db_games));
@@ -130,7 +130,7 @@ UTEST_F(GameServiceTest, SearchGames_FallbackToIgdb)
 
     EXPECT_CALL(mock_repo_, CreateGame(_))
         .WillOnce(
-            testing::Return(test::CreateFakePostgresGame("Cyberpunk 2077")));
+            testing::Return(game_service::test::CreateFakePostgresGame("Cyberpunk 2077")));
 
     auto client = MakeClient<::games::GameServiceClient>();
     auto response = client.SearchGames(request);
@@ -162,7 +162,7 @@ UTEST_F(GameServiceTest, SearchGames_DbError)
 // --- 2. GET GAME ---
 UTEST_F(GameServiceTest, GetGame_ById)
 {
-    auto fake_game = test::CreateFakePostgresGame("Doom");
+    auto fake_game = game_service::test::CreateFakePostgresGame("Doom");
     std::string str_id = boost::uuids::to_string(fake_game.id);
 
     ::games::GetGameRequest request;
@@ -181,7 +181,7 @@ UTEST_F(GameServiceTest, GetGame_ById)
 
 UTEST_F(GameServiceTest, GetGame_BySlug)
 {
-    auto fake_game = test::CreateFakePostgresGame("Zelda");
+    auto fake_game = game_service::test::CreateFakePostgresGame("Zelda");
     fake_game.slug = "zelda";
 
     ::games::GetGameRequest request;
@@ -243,7 +243,7 @@ UTEST_F(GameServiceTest, GetGamesByGenre_FromDb)
     request.set_limit(10);
 
     std::vector<entities::GamePostgres> games;
-    games.push_back(test::CreateFakePostgresGame("Baldur's Gate 3"));
+    games.push_back(game_service::test::CreateFakePostgresGame("Baldur's Gate 3"));
 
     EXPECT_CALL(mock_repo_, GetGamesByGenre(testing::Eq("RPG"), Eq(10)))
         .WillOnce(Return(games));
@@ -272,7 +272,7 @@ UTEST_F(GameServiceTest, GetGamesByGenre_FallbackIgdb)
         .WillOnce(Return(igdb_res));
 
     EXPECT_CALL(mock_repo_, CreateGame(_))
-        .WillOnce(Return(test::CreateFakePostgresGame("Hades")));
+        .WillOnce(Return(game_service::test::CreateFakePostgresGame("Hades")));
 
     auto client = MakeClient<::games::GameServiceClient>();
     auto response = client.GetGamesByGenre(request);
@@ -287,7 +287,7 @@ UTEST_F(GameServiceTest, GetTopRatedGames_Success)
     request.set_limit(3);
 
     std::vector<entities::GamePostgres> games;
-    games.push_back(test::CreateFakePostgresGame("Top Game"));
+    games.push_back(game_service::test::CreateFakePostgresGame("Top Game"));
 
     EXPECT_CALL(mock_repo_, GetTopRatedGames(3)).WillOnce(Return(games));
 
@@ -313,7 +313,7 @@ UTEST_F(GameServiceTest, GetUpcomingGames_FallbackIgdb)
     EXPECT_CALL(mock_igdb_, GetUpcomingGames(5)).WillOnce(Return(igdb_res));
 
     EXPECT_CALL(mock_repo_, CreateGame(_))
-        .WillOnce(Return(test::CreateFakePostgresGame("GTA VI")));
+        .WillOnce(Return(game_service::test::CreateFakePostgresGame("GTA VI")));
 
     auto client = MakeClient<::games::GameServiceClient>();
     auto response = client.GetUpcomingGames(request);
@@ -330,7 +330,7 @@ UTEST_F(GameServiceTest, ListGames_WithFilter)
     request.set_filter(::games::SortingType::PLAYHUB_RATING);
 
     std::vector<entities::GamePostgres> games;
-    games.push_back(test::CreateFakePostgresGame("List Item"));
+    games.push_back(game_service::test::CreateFakePostgresGame("List Item"));
 
     EXPECT_CALL(mock_repo_,
                 GetAllGames(20, 0, ::games::SortingType::PLAYHUB_RATING))
