@@ -59,7 +59,7 @@ const userver::storages::postgres::Query kFindGame{
     "screenshots, "
     "  genres, themes, platforms, created_at, updated_at "
     "FROM playhub.games "
-    "WHERE name ILIKE $1 "
+    "WHERE name ILIKE '%' || $1 || '%' "
     "LIMIT $2"
 };
 
