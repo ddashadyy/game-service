@@ -55,19 +55,16 @@ jobs:
 
       - name: Generate Coverage Report
         run: |
-        
           echo '#!/bin/bash' > llvm-gcov.sh
-          echo 'exec llvm-cov gcov "$$@"' >> llvm-gcov.sh
+          echo 'exec llvm-cov gcov "$@"' >> llvm-gcov.sh
           chmod +x llvm-gcov.sh
           
-          # 5. Захват данных
-          lcov --gcov-tool $(shell pwd)/llvm-gcov.sh --capture --directory build-debug --output-file build-debug/coverage.info
           
-          # 6. Удаляем временный скрипт
+          lcov --gcov-tool "$PWD/llvm-gcov.sh" --capture --directory build --output-file build/coverage.info
+        
           rm llvm-gcov.sh
           
-          # 7. Фильтруем (ИСКЛЮЧАЕМ ВАШИ ПАПКИ ЗДЕСЬ)
-          lcov --remove build-debug/coverage.info \
+          lcov --remove build/coverage.info \
             '/usr/*' \
             '*/_deps/*' \
             '*/tests/*' \
@@ -79,17 +76,10 @@ jobs:
             '*/include/handlers/*' \
             '*/include/repository/*' \
             '*/include/structs/*' \
-            --output-file build-debug/coverage_cleaned.info
+            --output-file build/coverage_cleaned.info
         
-          genhtml build-debug/coverage_cleaned.info --output-directory $(COVERAGE_OUTPUT_DIR)
+          genhtml build/coverage_cleaned.info --output-directory coverage_report
           
-          @echo "------------------------------------------------------------------"
-          @echo "Coverage report generated: file://$(shell pwd)/$(COVERAGE_OUTPUT_DIR)/index.html"
-          @echo "------------------------------------------------------------------"
-
-      - name: Upload Coverage Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage_report/
-          retention-days: 7
+          echo "------------------------------------------------------------------"
+          echo "Coverage report generated: file://$PWD/coverage_report/index.html"
+          echo "------------------------------------------------------------------"

@@ -18,3 +18,4 @@ generated
 .env
 configs/config_vars.yaml
 third_party/*
+coverage_report
