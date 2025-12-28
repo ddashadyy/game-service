@@ -36,6 +36,7 @@ jobs:
             -DUSERVER_FEATURE_GRPC=ON \
             -DUSERVER_FEATURE_POSTGRESQL=ON \
             -DENABLE_COVERAGE=ON \
+            -DUSERVER_FEATURE_STACK_USAGE_MONITOR=OFF \
             -DCMAKE_CXX_FLAGS="--coverage" \
             -DCMAKE_C_FLAGS="--coverage" \
             -GNinja
