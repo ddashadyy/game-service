@@ -21,9 +21,17 @@ jobs:
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
 
       - name: Install lcov
-        # В некоторых версиях образа lcov может не быть
         run: |
-          apt-get update && apt-get install -y lcov
+          apt-get update && apt-get install -y lcov git
+
+      
+      - name: Clone Proto Repository
+        run: |
+          # Создаем папку, если её нет
+          mkdir -p third_party
+          # Клонируем репозиторий с прото-файлами в нужную папку
+          # Если репозиторий приватный, см. примечание ниже*
+          git clone https://github.com/viktoralyoshin/playhub-proto.git third_party/playhub-proto
 
       - name: Configure CMake (Coverage Enabled)
         run: |
@@ -39,11 +47,12 @@ jobs:
 
       - name: Run Tests
         working-directory: build
+        
         run: ctest --output-on-failure || true
 
       - name: Generate Coverage Report
         run: |
-          # 1. Создаем обертку для llvm-cov (как мы делали в Makefile)
+          # 1. Создаем обертку для llvm-cov (для совместимости с lcov)
           echo '#!/bin/bash' > llvm-gcov.sh
           echo 'exec llvm-cov gcov "$@"' >> llvm-gcov.sh
           chmod +x llvm-gcov.sh
@@ -51,7 +60,7 @@ jobs:
           # 2. Собираем данные
           lcov --gcov-tool $(pwd)/llvm-gcov.sh --capture --directory build --output-file coverage.info
 
-          # 3. Фильтруем системные файлы и тесты
+          # 3. Фильтруем системные файлы, тесты и ваши папки managers/repository (как договаривались)
           lcov --remove coverage.info \
             '/usr/*' \
             '*/_deps/*' \

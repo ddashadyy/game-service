@@ -5,6 +5,15 @@ set(CMAKE_CXX_COMPILER "clang++")
 
 project(game-service CXX)
 
+option(ENABLE_COVERAGE "Enable code coverage metrics" OFF)
+
+if(ENABLE_COVERAGE)
+  message(STATUS "Enabling Code Coverage with Clang/GCC")
+
+  add_compile_options(--coverage -O0 -g)
+  add_link_options(--coverage)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF) 

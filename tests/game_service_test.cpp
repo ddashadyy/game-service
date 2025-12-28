@@ -69,7 +69,7 @@ entities::GamePostgres CreateFakePostgresGame(std::string_view name)
     return game;
 }
 
-} // namespace test
+} // namespace game_service::test
 
 class GameServiceTest : public userver::ugrpc::tests::ServiceFixtureBase
 {
@@ -96,7 +96,8 @@ UTEST_F(GameServiceTest, SearchGames_FoundInDb)
     request.set_limit(5);
 
     std::vector<entities::GamePostgres> db_games;
-    db_games.push_back(game_service::test::CreateFakePostgresGame("The Witcher 3"));
+    db_games.push_back(
+        game_service::test::CreateFakePostgresGame("The Witcher 3"));
 
     EXPECT_CALL(mock_repo_, FindGame(testing::Eq("Witcher"), testing::Eq(5)))
         .WillOnce(testing::Return(db_games));
@@ -129,8 +130,8 @@ UTEST_F(GameServiceTest, SearchGames_FallbackToIgdb)
         .WillOnce(testing::Return(igdb_games));
 
     EXPECT_CALL(mock_repo_, CreateGame(_))
-        .WillOnce(
-            testing::Return(game_service::test::CreateFakePostgresGame("Cyberpunk 2077")));
+        .WillOnce(testing::Return(
+            game_service::test::CreateFakePostgresGame("Cyberpunk 2077")));
 
     auto client = MakeClient<::games::GameServiceClient>();
     auto response = client.SearchGames(request);
@@ -243,7 +244,8 @@ UTEST_F(GameServiceTest, GetGamesByGenre_FromDb)
     request.set_limit(10);
 
     std::vector<entities::GamePostgres> games;
-    games.push_back(game_service::test::CreateFakePostgresGame("Baldur's Gate 3"));
+    games.push_back(
+        game_service::test::CreateFakePostgresGame("Baldur's Gate 3"));
 
     EXPECT_CALL(mock_repo_, GetGamesByGenre(testing::Eq("RPG"), Eq(10)))
         .WillOnce(Return(games));
@@ -375,5 +377,112 @@ UTEST_F(GameServiceTest, SetRating_InvalidUuid)
     {
         EXPECT_EQ(e.GetStatus().error_code(),
                   grpc::StatusCode::INVALID_ARGUMENT);
+    }
+}
+
+UTEST_F(GameServiceTest, GetGamesByGenre_DbError)
+{
+    ::games::GetGamesByGenreRequest request;
+    request.set_genre_name("Horror");
+    request.set_limit(5);
+
+    EXPECT_CALL(mock_repo_, GetGamesByGenre(_, _))
+        .WillOnce(testing::Throw(std::runtime_error("DB connection failed")));
+
+    auto client = MakeClient<::games::GameServiceClient>();
+
+    try
+    {
+        client.GetGamesByGenre(request);
+        FAIL() << "Expected INTERNAL error";
+    }
+    catch (const userver::ugrpc::client::ErrorWithStatus& e)
+    {
+        EXPECT_EQ(e.GetStatus().error_code(), grpc::StatusCode::INTERNAL);
+    }
+}
+
+UTEST_F(GameServiceTest, GetTopRatedGames_DbError)
+{
+    ::games::GetDiscoveryRequest request;
+    request.set_limit(5);
+
+    EXPECT_CALL(mock_repo_, GetTopRatedGames(_))
+        .WillOnce(testing::Throw(std::runtime_error("DB error")));
+
+    auto client = MakeClient<::games::GameServiceClient>();
+
+    try
+    {
+        client.GetTopRatedGames(request);
+        FAIL() << "Expected error";
+    }
+    catch (const userver::ugrpc::client::ErrorWithStatus& e)
+    {
+        EXPECT_NE(e.GetStatus().error_code(), grpc::StatusCode::OK);
+    }
+}
+
+UTEST_F(GameServiceTest, GetUpcomingGames_DbError)
+{
+    ::games::GetDiscoveryRequest request;
+    request.set_limit(5);
+
+    EXPECT_CALL(mock_repo_, GetUpcomingGames(_))
+        .WillOnce(testing::Throw(std::runtime_error("DB error")));
+
+    auto client = MakeClient<::games::GameServiceClient>();
+
+    try
+    {
+        client.GetUpcomingGames(request);
+        FAIL() << "Expected error";
+    }
+    catch (const userver::ugrpc::client::ErrorWithStatus& e)
+    {
+        EXPECT_NE(e.GetStatus().error_code(), grpc::StatusCode::OK);
+    }
+}
+
+UTEST_F(GameServiceTest, ListGames_DbError)
+{
+    ::games::ListGamesRequest request;
+    request.set_limit(10);
+
+    EXPECT_CALL(mock_repo_, GetAllGames(_, _, _))
+        .WillOnce(testing::Throw(std::runtime_error("DB error")));
+
+    auto client = MakeClient<::games::GameServiceClient>();
+
+    try
+    {
+        client.ListGames(request);
+        FAIL() << "Expected error";
+    }
+    catch (const userver::ugrpc::client::ErrorWithStatus& e)
+    {
+        EXPECT_NE(e.GetStatus().error_code(), grpc::StatusCode::OK);
+    }
+}
+
+UTEST_F(GameServiceTest, SetRating_DbError)
+{
+    ::games::RatingRequest request;
+    request.set_game_id("00000000-0000-0000-0000-000000000001");
+    request.set_rating(5.0);
+
+    EXPECT_CALL(mock_repo_, UpdateGameRating(_, _))
+        .WillOnce(testing::Throw(std::runtime_error("DB error")));
+
+    auto client = MakeClient<::games::GameServiceClient>();
+
+    try
+    {
+        client.SetRating(request);
+        FAIL() << "Expected error";
+    }
+    catch (const userver::ugrpc::client::ErrorWithStatus& e)
+    {
+        EXPECT_NE(e.GetStatus().error_code(), grpc::StatusCode::OK);
     }
 }

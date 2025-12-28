@@ -48,6 +48,58 @@ dist-clean:
 	rm -rf .vscode/.cache
 	rm -rf .vscode/compile_commands.json
 
+COVERAGE_OUTPUT_DIR ?= coverage_report
+
+.PHONY: coverage
+coverage:
+	# 1. Конфигурируем
+	cmake --preset debug $(CMAKE_OPTS) -DENABLE_COVERAGE=ON
+	
+	# 2. Собираем
+	cmake --build build-debug -j $(NPROCS)
+	
+	# 3. Тестируем
+	cd build-debug && ctest -V || true
+	
+	# 4. Обертка для llvm-cov (как мы делали раньше)
+	echo '#!/bin/bash' > llvm-gcov.sh
+	echo 'exec llvm-cov gcov "$$@"' >> llvm-gcov.sh
+	chmod +x llvm-gcov.sh
+	
+	# 5. Захват данных
+	lcov --gcov-tool $(shell pwd)/llvm-gcov.sh --capture --directory build-debug --output-file build-debug/coverage.info
+	
+	# 6. Удаляем временный скрипт
+	rm llvm-gcov.sh
+	
+	# 7. Фильтруем (ИСКЛЮЧАЕМ ВАШИ ПАПКИ ЗДЕСЬ)
+	lcov --remove build-debug/coverage.info \
+		'/usr/*' \
+		'*/_deps/*' \
+		'*/tests/*' \
+		'*/third_party/*' \
+		'*/generated/*' \
+		'*/src/managers/*' \
+		'*/src/repository/*' \
+		'*/include/managers/*' \
+		'*/include/handlers/*' \
+		'*/include/repository/*' \
+		'*/include/structs/*' \
+		--output-file build-debug/coverage_cleaned.info
+	
+	# 8. Генерируем HTML
+	genhtml build-debug/coverage_cleaned.info --output-directory $(COVERAGE_OUTPUT_DIR)
+	
+	@echo "------------------------------------------------------------------"
+	@echo "Coverage report generated: file://$(shell pwd)/$(COVERAGE_OUTPUT_DIR)/index.html"
+	@echo "------------------------------------------------------------------"
+
+.PHONY: clean-coverage
+clean-coverage:
+	rm -rf $(COVERAGE_OUTPUT_DIR)
+	rm -f build-debug/*.info
+
+
 # Install
 .PHONY: $(addprefix install-, $(PRESETS))
 $(addprefix install-, $(PRESETS)): install-%: build-%
