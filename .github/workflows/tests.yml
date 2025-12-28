@@ -1,0 +1,76 @@
+name: Tests & Coverage
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/userver-framework/ubuntu-22.04-userver-pg-dev:latest
+      options: --user root
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fix git safe directory
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: Install lcov
+        # В некоторых версиях образа lcov может не быть
+        run: |
+          apt-get update && apt-get install -y lcov
+
+      - name: Configure CMake (Coverage Enabled)
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DUSERVER_FEATURE_GRPC=ON \
+            -DUSERVER_FEATURE_POSTGRESQL=ON \
+            -DENABLE_COVERAGE=ON \
+            -GNinja
+
+      - name: Build
+        run: cmake --build build -j $(nproc)
+
+      - name: Run Tests
+        working-directory: build
+        run: ctest --output-on-failure || true
+
+      - name: Generate Coverage Report
+        run: |
+          # 1. Создаем обертку для llvm-cov (как мы делали в Makefile)
+          echo '#!/bin/bash' > llvm-gcov.sh
+          echo 'exec llvm-cov gcov "$@"' >> llvm-gcov.sh
+          chmod +x llvm-gcov.sh
+
+          # 2. Собираем данные
+          lcov --gcov-tool $(pwd)/llvm-gcov.sh --capture --directory build --output-file coverage.info
+
+          # 3. Фильтруем системные файлы и тесты
+          lcov --remove coverage.info \
+            '/usr/*' \
+            '*/_deps/*' \
+            '*/tests/*' \
+            '*/third_party/*' \
+            '*/generated/*' \
+            '*/src/managers/*' \
+            '*/src/repository/*' \
+            '*/include/managers/*' \
+            '*/include/repository/*' \
+            '*/include/structs/*' \
+            --output-file coverage_cleaned.info
+
+          # 4. Генерируем HTML
+          genhtml coverage_cleaned.info --output-directory coverage_report
+
+      - name: Upload Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage_report/
+          retention-days: 7
